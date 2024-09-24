@@ -1,0 +1,159 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+:root {
+  --FONT_GREY: rgb(170, 170, 170);
+  --BLUE-ACCENT: #2453d4;
+  --HEART-COLOR: rgb(255, 0, 128);
+}
+
+.product-card {
+  width: 350px;
+  height: 475px;
+  background-color: white;
+  border-radius: 10px;
+  border: 1px solid rgb(187, 187, 187);
+  position: relative;
+  overflow: hidden;
+}
+
+p {
+  font-size: small;
+  font-family: 'Roboto', sans-serif;
+  color: var(--FONT_GREY);
+  padding: 10px;
+}
+
+.product-card-top {
+  width: 100%;
+  height: 50px;
+  box-sizing: border-box;
+  display: flex; /* Changed to flex */
+  justify-content: space-between; /* Aligns the child elements with space between */
+  align-items: center; /* Vertically centers the content */
+}
+
+.product-card-image {
+  width: 100%;
+  height: 300px;
+  transition-property: height;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in-out;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.product-card-bottom {
+  width: 100%;
+  height: 120px;
+  transition-property: height;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in-out;
+  position: relative;
+}
+
+.product-card-popup {
+  display: flex; /* Align text and icon side by side */
+  align-items: center; /* Vertically center the text and icon */
+  justify-content: space-between; /* Spread text and icon apart */
+  width: 100%;
+  background-color: var(--BLUE-ACCENT);
+  height: 60px;
+  position: absolute;
+  bottom: -60px;
+  transform: translateY(0);
+  transition: transform 0.3s ease-in-out;
+  box-sizing: border-box;
+  padding: 0 10px; /* Add some padding for spacing */
+}
+
+.product-card-popup:hover {
+  cursor: pointer;
+}
+
+.product-card:hover {
+  .product-card-popup {
+    transform: translateY(-60px);
+    transition-property: transform;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-in-out;
+  }
+
+  .product-card-bottom {
+    height: 110px;
+    transition-property: height;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-in-out;
+  }
+  .product-card-image {
+    height: 250px;
+    transition-property: height;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-in-out;
+  }
+}
+
+h3 {
+  padding: 0;
+  font-family: "Roboto", sans-serif;
+}
+
+h4 {
+  padding-left: 0; /* Removed padding to ensure proper alignment with the icon */
+  color: white;
+  font-family: "Roboto", sans-serif;
+}
+
+.product-image {
+  height: 200px;
+  width: calc(200 * 1.486);
+  position: absolute;
+  bottom: 50px;
+}
+
+.heart-svg {
+  color: var(--FONT_GREY);
+  transition-property: color;
+  transition-duration: 0.3s;
+  font-size: 24px;
+  padding-right: 10px;
+}
+
+.heart-svg:hover {
+  color: var(--HEART-COLOR);
+}
+
+.product-card-top-1 {
+  width: 80%;
+}
+
+.product-card-top-2 {
+  width: 10%;
+  text-align: right; /* Ensures the heart icon is aligned to the right */
+}
+
+.product-card-bottom-1 {
+  width: 100%;
+  height: 50%;
+  position: absolute;
+  top: 0;
+}
+
+.product-card-bottom-2 {
+  width: 100%;
+  height: 50%;
+  position: absolute;
+  bottom: 0;
+  padding: 10px;
+}
+
+.product-title {
+  font-size: large;
+  position: absolute;
+  top: 0;
+}
+
+.product-card-cart-icon {
+  color: white;
+  font-size: 24px;
+}
