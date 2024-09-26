@@ -1,18 +1,17 @@
-import React, {useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./Carousel.css"; // External CSS for styling
 
-const Carousel = ({ images }) => {
+const Carousel = ({ promoText, images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(false);
 
-
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setFade(true);
     setTimeout(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
       setFade(false);
     }, 500); // Fade transition duration
-  };
+  }, [images.length]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -20,9 +19,7 @@ const Carousel = ({ images }) => {
     }, 3000); // Image switch interval
 
     return () => clearInterval(interval);
-  }, [currentIndex]);
-
-
+  }, [nextSlide]);
 
   const prevSlide = () => {
     setFade(true);
@@ -36,14 +33,17 @@ const Carousel = ({ images }) => {
 
   return (
     <div className="carousel-container">
-      <div className={`carousel-image ${fade ? "fade" : ""}`}>
-        <img src={images[currentIndex]} alt={`Slide ${currentIndex + 1}`} />
-      </div>
-      <div className="carousel-arrow carousel-arrow-left" onClick={prevSlide}>
-        &#10094;
-      </div>
-      <div className="carousel-arrow carousel-arrow-right" onClick={nextSlide}>
-        &#10095;
+      <div className="carousel-middle">
+        <div className="carousel-middle-left">
+          <div className="promo-container">
+            <p className={`promo-text ${fade ? "fade" : ""}`}>Computers up to -15% off</p>
+            <button className="shop-now-promo-button">Shop now</button>
+          </div>
+          
+        </div>
+        <div className={`carousel-middle-right ${fade ? "fade" : ""}`}>
+          <img src={images[currentIndex]} alt="" className="promo-image"/>
+        </div>
       </div>
     </div>
   );

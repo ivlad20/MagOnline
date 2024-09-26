@@ -121,6 +121,7 @@ h4 {
 
 .heart-svg:hover {
   color: var(--HEART-COLOR);
+  cursor: pointer;
 }
 
 .product-card-top-1 {

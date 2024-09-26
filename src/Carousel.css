@@ -1,27 +1,96 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+
+
+:root {
+  --BG_WHITE_ACCENT: #f3f6fb;
+  --BLUE-ACCENT: #2453d4;
+}
+
+
 .carousel-container {
   width: 100%;
   height: 500px;
-  background-color: aliceblue;
+  background-color: var(--BG_WHITE_ACCENT);
   position: relative;
   overflow: hidden;
   display: flex;
+  justify-content: center;
 }
 
-.carousel-image {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  transition: opacity 0.5s ease-in-out;
+.carousel-middle {
+  width: 70%;
+  max-width: 1500px;
+  height: 500px;
+  display: flex;
 }
 
-.carousel-image img {
+.carousel-middle-left {
+  height: 500px;
+  width: 30%;
+  display: flex;
+  align-items: center;
+}
+
+.carousel-middle-right {
+  height: 500px;
+  width: 70%;
+}
+
+.promo-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.shop-now-promo-button {
+  width: 150px;
+  height: 50px;
+  background-color: var(--BLUE-ACCENT);
+  transition-property: background-color;
+  transition-duration: 0.3s;
+  border: 0;
+  border-radius: 10px;
+  color: white;
+  font-family: 'Roboto', sans-serif;
+  font-size: medium;
+  font-weight: 700;
+  opacity: 100%;
+  transition-property: opacity;
+  transition-duration: 1s;
+}
+
+.shop-now-promo-button:hover{
+  background-color: #2951bd;
+  transition-property: background-color;
+  transition-duration: 1s;
+  cursor: pointer;
+}
+
+.promo-text {
+  font-size: 40px;
+  color: black;
+  font-weight: bold;
+  font-family: 'Roboto', sans-serif;
+  opacity: 100%;
+  transition-property: opacity;
+  transition-duration: 1s;
+  transition-timing-function: ease-in-out;
+}
+
+.promo-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  opacity: 100%;
+  transition-property: opacity;
+  transition-duration: 1s;
+  transition-timing-function: ease-in-out;
 }
 
 .fade {
   opacity: 0;
+  transition-property: opacity;
+  transition-duration: 1s;
+  transition-timing-function: ease-in-out;
 }
 
 /* Arrows styling */

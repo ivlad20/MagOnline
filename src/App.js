@@ -8,8 +8,8 @@ import ProductCard from "./ProductCard";
 
 function App() {
   const images = [
-    "https://via.placeholder.com/800x400?text=Image+1",
-    "https://via.placeholder.com/800x400?text=Image+2",
+    "https://clipground.com/images/joystick-png-2.png",
+    "https://clipground.com/images/joystick-png-2.png",
     "https://via.placeholder.com/800x400?text=Image+3",
   ];
 
@@ -171,9 +171,7 @@ function App() {
             price={"300"}
           />
         </div>
-        <div>
-          <Carousel images={images} />
-        </div>
+        <Carousel images={images} />
       </div>
     </div>
   );
