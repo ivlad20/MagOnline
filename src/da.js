@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import "./Carousel.css"; // External CSS for styling
 
-const Carousel = ({ promoText, images }) => {
+const Carousel = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(false);
 
@@ -33,20 +33,15 @@ const Carousel = ({ promoText, images }) => {
 
   return (
     <div className="carousel-container">
-      <div className="carousel-middle">
-        <div className="carousel-middle-left">
-          <div className="promo-container">
-            <p className={`promo-text ${fade ? "fade" : ""}`}>{promoText[currentIndex]}</p>
-            <button className={`shop-now-promo-button ${fade ? "fade" : ""}`}>Shop now</button>
-          </div>
-          
-        </div>
-        <div className={`carousel-middle-right ${fade ? "fade" : ""}`}>
-          <img src={images[currentIndex]} alt="" className="promo-image"/>
-        </div>
+      <div className={ca ${fade ? "fade" : ""}}>
+        <img src={images[currentIndex]} alt={Slide ${currentIndex + 1}} />
+      </div>
+      <div className="carousel-arrow carousel-arrow-left" onClick={prevSlide}>
+        &#10094;
+      </div>
+      <div className="carousel-arrow carousel-arrow-right" onClick={nextSlide}>
+        &#10095;
       </div>
     </div>
   );
 };
-
-export default Carousel;
