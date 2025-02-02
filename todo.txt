@@ -1,0 +1,4 @@
+*Mai multe dimensiuni la product cards
+*login overlay pentru pagina principala
+*refacerea caruselului de imagini
+*crearea mai multor pagini folosind navigate
