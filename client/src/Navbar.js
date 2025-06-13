@@ -10,6 +10,7 @@ const Navbar = () => {
       <nav className="navbar1">
         <div className="logo">
           <img src="images/logo.png" alt="logo" className="logo-img" />
+          
         </div>
         <div className="searchBar">
           <Dropdown />
@@ -76,9 +77,11 @@ const Navbar = () => {
 
       <nav className="navbar2">
         <div className="navbar2-links">
-          <div className="nav-link">
-            <b>Home</b>
-          </div>
+          <Link to="/">
+            <div className="nav-link">
+              <b>Home</b>
+            </div>
+          </Link>
           <div className="nav-link">
             <b>Pages</b>
           </div>

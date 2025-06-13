@@ -2,23 +2,19 @@ import React from "react";
 import "./App.css";
 import Navbar from "./Navbar";
 import Login from "./Login";
-import { Routes, Route } from 'react-router-dom'; // Import Routes and Route
+import { Routes, Route } from "react-router-dom"; // Import Routes and Route
 import Home from "./Home"; // Import the Home component
+import Footer from "./Footer";
 
 function App() {
   return (
     <div>
       <Navbar />
       <Routes>
-        <Route
-          path="/"
-          element={<Home />}
-        />
-        <Route 
-          path="/login" 
-          element={<Login />} 
-          />
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
+      <Footer />
     </div>
   );
 }

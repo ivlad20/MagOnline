@@ -41,7 +41,7 @@
 
 p.small {
   font-size: 10px;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   color: var(--FONT_GREY);
   padding: 10px;
 }

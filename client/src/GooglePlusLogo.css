@@ -1,0 +1,13 @@
+.google-plus-icon path {
+  fill: #777; /* Initial grey color */
+  transition: fill 0.3s ease;
+}
+
+.google-plus-icon:hover path {
+  fill: rgb(221, 75, 57); /* Blue on hover */
+}
+
+.google-plus-icon {
+  height: 2vh;
+  width: 2vh;
+}
