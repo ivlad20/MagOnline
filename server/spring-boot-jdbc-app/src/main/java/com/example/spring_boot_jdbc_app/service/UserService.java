@@ -18,4 +18,6 @@ public interface UserService {
 
     // DELETE
     int deleteUser(Integer id);
+
+    User getUserByEmail(String email);
 }

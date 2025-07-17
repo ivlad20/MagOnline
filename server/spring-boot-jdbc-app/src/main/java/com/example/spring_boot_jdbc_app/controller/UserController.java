@@ -1,20 +1,36 @@
 package com.example.spring_boot_jdbc_app.controller;
 
+import com.example.spring_boot_jdbc_app.model.JWTResponse;
+import com.example.spring_boot_jdbc_app.model.LoginRequest;
 import com.example.spring_boot_jdbc_app.model.User;
 import com.example.spring_boot_jdbc_app.repository.UserRepository;
+import com.example.spring_boot_jdbc_app.security.JwtUtil;
+import com.example.spring_boot_jdbc_app.security.MyUserDetails;
+import com.example.spring_boot_jdbc_app.service.UserServiceImp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(
+        origins = {"http://localhost:3000", "http://127.0.0.1:3000"},
+        allowCredentials = "true",
+        allowedHeaders = "*",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
+)
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserServiceImp userService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     // CREATE: Add a new user
     @PostMapping
@@ -52,7 +68,7 @@ public class UserController {
         User existingUser = userRepository.getUserById(id);
         if (existingUser != null) {
             // Set the ID of the updated user to the path variable id
-            User userToUpdate = new User(id, updatedUser.name(), updatedUser.surname(), updatedUser.username(), updatedUser.email(), updatedUser.address(), updatedUser.phone());
+            User userToUpdate = new User(id, updatedUser.name(), updatedUser.surname(), updatedUser.username(), updatedUser.email(), updatedUser.address(), updatedUser.phone(), updatedUser.password());
             int result = userRepository.updateUser(userToUpdate);
             if (result == 1) {
                 return new ResponseEntity<>("User updated successfully", HttpStatus.OK);
@@ -74,4 +90,22 @@ public class UserController {
             return new ResponseEntity<>("Failed to delete user", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        System.out.println(request.email() + " " + request.password());
+        try {
+            // 1. Autentifică utilizatorul
+            MyUserDetails userDetails = (MyUserDetails) userService.authenticate(request.email(), request.password());
+
+            // 2. Generează token JWT
+            String token = jwtUtil.generateToken(userDetails.getEmail(), userDetails.getUsername());
+
+            // 3. Returnează tokenul
+            return ResponseEntity.ok(new JWTResponse(token));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username sau parolă incorecte.");
+        }
+    }
+
 }

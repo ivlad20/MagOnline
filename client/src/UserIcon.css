@@ -1,0 +1,13 @@
+.user-icon path {
+  fill: #777; /* Initial grey color */
+  transition: fill 0.3s ease;
+}
+
+.user-icon:hover path {
+  fill: #2453d4; /* Blue on hover */
+}
+
+.user-icon {
+  height: 2vh;
+  width: 2vh;
+}

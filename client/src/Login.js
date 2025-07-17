@@ -5,9 +5,47 @@ import FacebookLogo from "./FacebookLogo";
 import GooglePlusLogo from "./GooglePlusLogo";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+// Configure axios defaults for CORS
+axios.defaults.withCredentials = true;
+axios.defaults.headers.common['Content-Type'] = 'application/json';
+
+
+// Request interceptor to add token to all requests
+// axios.interceptors.request.use(
+//   (config) => {
+//     const token = localStorage.getItem('token');
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`;
+//     }
+//     return config;
+//   },
+//   (error) => {
+//     return Promise.reject(error);
+//   }
+// );
+
+// Response interceptor to handle 401/403 errors
+// axios.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+//       // Token might be expired or invalid
+//       localStorage.removeItem('token');
+//       // Redirect to login or show login modal
+//       window.location.href = '/login';
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 const Login = () => {
   const [showFirst, setShowFirst] = useState(true);
+
+  const navigate = useNavigate();
+
   const signInValidationSchema = Yup.object({
     email: Yup.string().email("Invalid email").required("Email is required"),
     password: Yup.string()
@@ -30,6 +68,81 @@ const Login = () => {
       .oneOf([Yup.ref("password"), null], "Passwords must match")
       .required("Please confirm your password"),
   });
+
+  const handleSignUp = async (values, { setSubmitting, resetForm, setErrors }) => {
+    try {
+      const userPayload = {
+        name: values.name,
+        surname: values.surname,
+        username: values.username,
+        phone: values.phone,
+        email: values.email,
+        password: values.password,
+        address: null,
+      };
+
+      const response = await axios.post(
+        "http://localhost:8080/users",
+        userPayload,
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log("User created:", response.data);
+      alert("Account created successfully!");
+      resetForm();
+      setShowFirst(true);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      if (error.response) {
+        setErrors({ email: `Error: ${error.response.data || 'Failed to create account'}` });
+      } else {
+        setErrors({ email: "Network error. Please try again." });
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleLogin = async (values, { setSubmitting, setErrors }) => {
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/users/login",
+      {
+        email: values.email,
+        password: values.password,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const token = response.data.token;
+    localStorage.setItem("token", token);
+    
+    // alert("Login successful!");
+    navigate("/")
+    console.log("Token saved:", token);
+
+  } catch (error) {
+    console.error("Login error:", error);
+    if (error.response && error.response.status === 401) {
+      setErrors({ password: "Invalid email or password." });
+    } else if (error.response) {
+      setErrors({ password: `Error: ${error.response.data || 'Login failed'}` });
+    } else {
+      setErrors({ password: "Network error. Please try again." });
+    }
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <div>
@@ -56,7 +169,7 @@ const Login = () => {
                 <Formik
                   initialValues={{ email: "", password: "" }}
                   validationSchema={signInValidationSchema}
-                  onSubmit={(values) => console.log(values)}
+                  onSubmit={handleLogin}
                 >
                   {({ isSubmitting }) => (
                     <Form className="formik-login-form">
@@ -165,95 +278,109 @@ const Login = () => {
                     confirmPassword: "",
                   }}
                   validationSchema={signUpValidationSchema}
-                  onSubmit={(values) => console.log("Sign Up:", values)}
+                  onSubmit={handleSignUp}
                 >
                   {({ isSubmitting }) => (
                     <Form className="formik-login-form">
                       <div className="sign-up-inputs-container">
                         <div className="sign-up-inputs-container-name">
-                          <Field
-                            type="text"
-                            name="name"
-                            placeholder="Name"
-                            className="sign-up-input-small"
-                          />
-                          <ErrorMessage
-                            name="name"
-                            component="div"
-                            className="login-error-message"
-                          />
-                          <Field
-                            type="text"
-                            name="surname"
-                            placeholder="Surname"
-                            className="sign-up-input-small"
-                          />
-                          <ErrorMessage
-                            name="surname"
-                            component="div"
-                            className="login-error-message"
-                          />
+                          <div className="form-plus-error-container">
+                            <Field
+                              type="text"
+                              name="name"
+                              placeholder="Name"
+                              className="sign-up-input-small"
+                            />
+                            <ErrorMessage
+                              name="name"
+                              component="div"
+                              className="signup-error-message"
+                            />
+                          </div>
+                          <div className="form-plus-error-container">
+                            <Field
+                              type="text"
+                              name="surname"
+                              placeholder="Surname"
+                              className="sign-up-input-small"
+                            />
+                            <ErrorMessage
+                              name="surname"
+                              component="div"
+                              className="signup-error-message"
+                            />
+                          </div>
                         </div>
                         <div className="sign-up-inputs-container-phone">
-                          <Field
-                            type="text"
-                            name="username"
-                            placeholder="Username"
-                            className="sign-up-input-small"
-                          />
-                          <ErrorMessage
-                            name="username"
-                            component="div"
-                            className="login-error-message"
-                          />
-                          <Field
-                            type="text"
-                            name="phone"
-                            placeholder="Phone"
-                            className="sign-up-input-small"
-                          />
-                          <ErrorMessage
-                            name="phone"
-                            component="div"
-                            className="login-error-message"
-                          />
+                          <div className="form-plus-error-container">
+                            <Field
+                              type="text"
+                              name="username"
+                              placeholder="Username"
+                              className="sign-up-input-small"
+                            />
+                            <ErrorMessage
+                              name="username"
+                              component="div"
+                              className="signup-error-message"
+                            />
+                          </div>
+                          <div className="form-plus-error-container">
+                            <Field
+                              type="text"
+                              name="phone"
+                              placeholder="Phone"
+                              className="sign-up-input-small"
+                            />
+                            <ErrorMessage
+                              name="phone"
+                              component="div"
+                              className="signup-error-message"
+                            />
+                          </div>
                         </div>
                         <div className="sign-up-inputs-container-email">
-                          <Field
-                            type="email"
-                            name="email"
-                            placeholder="Email"
-                            className="sign-up-input-small"
-                          />
-                          <ErrorMessage
-                            name="email"
-                            component="div"
-                            className="login-error-message"
-                          />
+                          <div className="form-plus-error-container">
+                            <Field
+                              type="email"
+                              name="email"
+                              placeholder="Email"
+                              className="sign-up-input-small"
+                            />
+                            <ErrorMessage
+                              name="email"
+                              component="div"
+                              className="signup-error-message"
+                            />
+                          </div>
                         </div>
                         <div className="sign-up-inputs-container-password">
-                          <Field
-                            type="password"
-                            name="password"
-                            placeholder="Password"
-                            className="sign-up-input-small"
-                          />
-                          <ErrorMessage
-                            name="password"
-                            component="div"
-                            className="login-error-message"
-                          />
-                          <Field
-                            type="password"
-                            name="confirmPassword"
-                            placeholder="Confirm Password"
-                            className="sign-up-input-small"
-                          />
-                          <ErrorMessage
-                            name="confirmPassword"
-                            component="div"
-                            className="login-error-message"
-                          />
+                          <div className="form-plus-error-container">
+                            <Field
+                              type="password"
+                              name="password"
+                              placeholder="Password"
+                              className="sign-up-input-small"
+                            />
+                            <ErrorMessage
+                              name="password"
+                              component="div"
+                              className="signup-error-message"
+                            />
+                          </div>
+                          <div className="form-plus-error-container">
+                            <Field
+                              type="password"
+                              name="confirmPassword"
+                              placeholder="Confirm Password"
+                              className="sign-up-input-small"
+                            />
+                            <ErrorMessage
+                              name="confirmPassword"
+                              component="div"
+                              className="signup-error-message"
+                            />
+                          </div>
                         </div>
                       </div>
                       <button

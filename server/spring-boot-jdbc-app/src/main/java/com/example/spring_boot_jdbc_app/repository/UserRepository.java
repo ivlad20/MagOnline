@@ -3,10 +3,13 @@ package com.example.spring_boot_jdbc_app.repository;
 import com.example.spring_boot_jdbc_app.model.User;
 import com.example.spring_boot_jdbc_app.model.Address;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
@@ -19,15 +22,25 @@ public class UserRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    @Lazy
+    private PasswordEncoder passwordEncoder;
+
     // RowMapper to map SQL result to User object
     private RowMapper<User> userRowMapper = (rs, rowNum) -> {
-        Address address = new Address(
-                rs.getString("street"),
-                rs.getString("city"),
-                rs.getString("zipcode"),
-                rs.getString("apartment"),
-                rs.getString("floor")
-        );
+        Address address = null;
+
+        // verificăm dacă cel puțin un câmp nu e null
+        if (rs.getString("street") != null || rs.getString("city") != null || rs.getString("zipcode") != null ||
+                rs.getString("apartment") != null || rs.getString("floor") != null) {
+            address = new Address(
+                    rs.getString("street"),
+                    rs.getString("city"),
+                    rs.getString("zipcode"),
+                    rs.getString("apartment"),
+                    rs.getString("floor")
+            );
+        }
 
         return new User(
                 rs.getInt("id"),
@@ -36,14 +49,15 @@ public class UserRepository {
                 rs.getString("username"),
                 rs.getString("email"),
                 address,
-                rs.getString("phone")
+                rs.getString("phone"),
+                rs.getString("password")
         );
     };
 
     // CREATE: Add a new user and their address
     public int saveUser(User user) {
-        // Insert into users table
-        String userSql = "INSERT INTO users (name, surname, username, email, phone) VALUES (?, ?, ?, ?, ?)";
+        // Inserare în tabela users
+        String userSql = "INSERT INTO users (name, surname, username, email, phone, password) VALUES (?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -53,13 +67,18 @@ public class UserRepository {
             ps.setString(3, user.username());
             ps.setString(4, user.email());
             ps.setString(5, user.phone());
+            ps.setString(6, passwordEncoder.encode(user.password()));
             return ps;
         }, keyHolder);
 
-        // Get the generated user ID
         int userId = keyHolder.getKey().intValue();
 
-        // Insert into addresses table
+        // Dacă adresa e null, nu o inserezi
+        if (user.address() == null) {
+            return 1; // succes inserare doar user
+        }
+
+        // Inserare în tabela addresses
         String addressSql = "INSERT INTO addresses (street, city, zipcode, apartment, floor, user_id) VALUES (?, ?, ?, ?, ?, ?)";
         return jdbcTemplate.update(
                 addressSql,
@@ -81,15 +100,33 @@ public class UserRepository {
 
     // READ: Get user by ID with their address
     public User getUserById(Integer id) {
-        String sql = "SELECT u.*, a.street, a.city, a.zipcode, a.apartment, a.floor " +
-                "FROM users u LEFT JOIN addresses a ON u.id = a.user_id WHERE u.id = ?";
-        return jdbcTemplate.queryForObject(sql, userRowMapper, id);
+        try {
+            String sql = "SELECT u.*, a.street, a.city, a.zipcode, a.apartment, a.floor " +
+                    "FROM users u LEFT JOIN addresses a ON u.id = a.user_id WHERE u.id = ?";
+            return jdbcTemplate.queryForObject(sql, userRowMapper, id);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     // UPDATE: Update a user and their address
     public int updateUser(User user) {
-        // Update users table
-        String userSql = "UPDATE users SET name = ?, surname = ?, username = ?, email = ?, phone = ? WHERE id = ?";
+        // First check if user exists
+        User existingUser = getUserById(user.id());
+        if (existingUser == null) {
+            return 0;
+        }
+
+        // Only encode password if it's different from the existing one
+        String passwordToUpdate = user.password();
+        if (!passwordToUpdate.equals(existingUser.password())) {
+            // If password is not already encoded, encode it
+            if (!passwordToUpdate.startsWith("$2a$")) {
+                passwordToUpdate = passwordEncoder.encode(passwordToUpdate);
+            }
+        }
+
+        String userSql = "UPDATE users SET name = ?, surname = ?, username = ?, email = ?, phone = ?, password = ? WHERE id = ?";
         jdbcTemplate.update(
                 userSql,
                 user.name(),
@@ -97,25 +134,63 @@ public class UserRepository {
                 user.username(),
                 user.email(),
                 user.phone(),
+                passwordToUpdate,
                 user.id()
         );
 
-        // Update addresses table
-        String addressSql = "UPDATE addresses SET street = ?, city = ?, zipcode = ?, apartment = ?, floor = ? WHERE user_id = ?";
-        return jdbcTemplate.update(
-                addressSql,
-                user.address().street(),
-                user.address().city(),
-                user.address().zipcode(),
-                user.address().apartment(),
-                user.address().floor(),
-                user.id()
-        );
+        // Handle address update
+        if (user.address() == null) {
+            // Delete existing address if new user has no address
+            jdbcTemplate.update("DELETE FROM addresses WHERE user_id = ?", user.id());
+            return 1;
+        }
+
+        // Check if address exists
+        String checkAddressSql = "SELECT COUNT(*) FROM addresses WHERE user_id = ?";
+        int addressCount = jdbcTemplate.queryForObject(checkAddressSql, Integer.class, user.id());
+
+        if (addressCount > 0) {
+            // Update existing address
+            String addressSql = "UPDATE addresses SET street = ?, city = ?, zipcode = ?, apartment = ?, floor = ? WHERE user_id = ?";
+            return jdbcTemplate.update(
+                    addressSql,
+                    user.address().street(),
+                    user.address().city(),
+                    user.address().zipcode(),
+                    user.address().apartment(),
+                    user.address().floor(),
+                    user.id()
+            );
+        } else {
+            // Insert new address
+            String addressSql = "INSERT INTO addresses (street, city, zipcode, apartment, floor, user_id) VALUES (?, ?, ?, ?, ?, ?)";
+            return jdbcTemplate.update(
+                    addressSql,
+                    user.address().street(),
+                    user.address().city(),
+                    user.address().zipcode(),
+                    user.address().apartment(),
+                    user.address().floor(),
+                    user.id()
+            );
+        }
     }
 
     // DELETE: Delete a user and their associated address (cascade delete is handled by the database)
     public int deleteUser(Integer id) {
         String sql = "DELETE FROM users WHERE id = ?";
         return jdbcTemplate.update(sql, id);
+    }
+
+    // Used for logging in
+    public User getUserByEmail(String email) {
+        try {
+            String sql = "SELECT u.*, a.street, a.city, a.zipcode, a.apartment, a.floor " +
+                    "FROM users u LEFT JOIN addresses a ON u.id = a.user_id " +
+                    "WHERE u.email = ?";
+            return jdbcTemplate.queryForObject(sql, userRowMapper, email);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 }

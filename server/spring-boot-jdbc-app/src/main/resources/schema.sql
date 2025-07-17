@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS users (
     surname VARCHAR(100) NOT NULL,      -- Last name of the user
     username VARCHAR(100) UNIQUE NOT NULL, -- Unique username for the user
     email VARCHAR(150) UNIQUE NOT NULL, -- Unique email for the user
-    phone VARCHAR(15)                   -- Phone number of the user
+    phone VARCHAR(15),                  -- Phone number of the user
+    password VARCHAR(100) NOT NULL      -- Password
     );
 
 -- Create the `addresses` table if it doesn't exist

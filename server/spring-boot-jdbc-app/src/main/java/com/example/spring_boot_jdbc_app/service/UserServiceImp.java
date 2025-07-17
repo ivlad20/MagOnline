@@ -2,7 +2,12 @@ package com.example.spring_boot_jdbc_app.service;
 
 import com.example.spring_boot_jdbc_app.model.User;
 import com.example.spring_boot_jdbc_app.repository.UserRepository;
+import com.example.spring_boot_jdbc_app.security.JwtUtil;
+import com.example.spring_boot_jdbc_app.security.MyUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,6 +17,10 @@ public class UserServiceImp implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     // CREATE: Add a new user
     @Override
@@ -46,7 +55,8 @@ public class UserServiceImp implements UserService {
                     updatedUser.username(),
                     updatedUser.email(),
                     updatedUser.address(),
-                    updatedUser.phone()
+                    updatedUser.phone(),
+                    updatedUser.password()
             );
             return userRepository.updateUser(userToUpdate);
         }
@@ -59,5 +69,22 @@ public class UserServiceImp implements UserService {
         // You can add any additional business logic here
         return userRepository.deleteUser(id);
     }
+
+    // READ: Get user by email
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository.getUserByEmail(email);
+    }
+
+    // Login and generate web token
+
+    public UserDetails authenticate(String email, String password) {
+        User user = userRepository.getUserByEmail(email);
+        if (user == null || !passwordEncoder.matches(password, user.password())) {
+            throw new BadCredentialsException("Invalid email or password");
+        }
+        return new MyUserDetails(user);
+    }
+
 
 }
