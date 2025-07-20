@@ -222,9 +222,7 @@ const Footer = () => {
         </div>
       </div>
       <div className="separation-bar-3"></div>
-      <div className="footer-anpc-container">
-        
-      </div>
+      <div className="footer-anpc-container"></div>
     </div>
   );
 };

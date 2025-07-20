@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import "./Login.css";
 import Iridescence from "./Iridescence";
-import FacebookLogo from "./FacebookLogo";
-import GooglePlusLogo from "./GooglePlusLogo";
+import FacebookLogo from "../logos/FacebookLogo";
+import GooglePlusLogo from "../logos/GooglePlusLogo";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthContext";
+import { jwtDecode } from "jwt-decode";
 
 // Configure axios defaults for CORS
 axios.defaults.withCredentials = true;
@@ -42,6 +44,8 @@ axios.defaults.headers.common['Content-Type'] = 'application/json';
 // );
 
 const Login = () => {
+
+  const { setIsLoggedIn, setUsername } = useAuth();
   const [showFirst, setShowFirst] = useState(true);
 
   const navigate = useNavigate();
@@ -125,8 +129,11 @@ const Login = () => {
 
     const token = response.data.token;
     localStorage.setItem("token", token);
+    const decoded = jwtDecode(token);
     
     // alert("Login successful!");
+    setIsLoggedIn(true);
+    setUsername(decoded.username);
     navigate("/")
     console.log("Token saved:", token);
 

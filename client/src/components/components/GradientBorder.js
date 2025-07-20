@@ -21,14 +21,18 @@ const GradientBorder = ({
     boxSizing: "border-box",
   };
 
-  const contentStyle = {
-    background: "white",
-    borderRadius: "8px",
-    height: "100%",
-    width: "100%",
-    padding: "20px",
-    boxSizing: "border-box",
-  };
+const contentStyle = {
+  background: "white",
+  borderRadius: "8px",
+  height: "100%",
+  width: "100%",
+  padding: "20px",
+  boxSizing: "border-box",
+  display: "flex",
+  justifyContent: "center",
+  // alignItems: "flex-start", // Note: 'left' isn't valid for alignItems, see note below
+};
+
 
   return (
     <>

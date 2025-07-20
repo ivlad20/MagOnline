@@ -1,0 +1,21 @@
+.user-icon path {
+  fill: var(--ACCENT-GREY); /* Initial grey color */
+  /* transition: fill 0.3s ease; */
+}
+
+/* .user-icon:hover path {
+  fill: #2453d4; 
+}
+*/
+
+.user-icon {
+  height: 2vh;
+  width: 2vh;
+}
+
+.user-icon-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.4s ease;
+}

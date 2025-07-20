@@ -3,7 +3,7 @@ import "./UserIcon.css";
 
 const UserIcon = () => {
   return (
-    <div>
+    <div className="user-icon-box">
       <svg
         width="24"
         height="24"

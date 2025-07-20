@@ -1,19 +1,24 @@
 import React from "react";
 import "./App.css";
-import Navbar from "./Navbar";
-import Login from "./Login";
+import Navbar from "./components/components/Navbar";
+import Login from "./components/components/Login";
 import { Routes, Route } from "react-router-dom"; // Import Routes and Route
-import Home from "./Home"; // Import the Home component
-import Footer from "./Footer";
+import Home from "./components/components/Home"; // Import the Home component
+import Footer from "./components/components/Footer";
+import { AuthProvider } from "./components/components/AuthContext";
+import Account from "./components/components/Account"
 
 function App() {
   return (
     <div>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
+      <AuthProvider>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/account" element={<Account />}></Route> 
+        </Routes>
+      </AuthProvider>
       <Footer />
     </div>
   );

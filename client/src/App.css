@@ -5,7 +5,9 @@
   --FONT_GREY: rgb(170, 170, 170);
   --BLUE-ACCENT: #2453d4;
   --HEART-COLOR: rgb(255, 0, 128);
+  /* --FOOTER-GREY: #28282c; */
   --FOOTER-GREY: #1a1a1a;
+  --ACCENT-GREY: #777;
 }
 
 body,

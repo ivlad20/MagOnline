@@ -101,8 +101,8 @@ h4 {
 }
 
 .product-image {
-  height: 200px;
-  width: calc(200 * 1.486);
+  height: 250px;
+  width: calc(250 * 1.486);
   position: absolute;
   bottom: 50px;
 }
