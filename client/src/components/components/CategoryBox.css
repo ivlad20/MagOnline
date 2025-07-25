@@ -1,59 +1,59 @@
-:root {
-  --BG_WHITE_ACCENT: #f3f6fb;
-}
-
-
 .shopNow-category-container {
-  width: 35%;
-  height: 180px;
+  height: 175px;
+  width: 30%;
   background-color: var(--BG_WHITE_ACCENT);
   border-radius: 10px;
-  max-width: 500px;
-  min-width: 400px;
-  display: inline-flex; /* Use flexbox for better alignment */
-  justify-content: space-between; /* Space between the left and right */
-  align-items: center; /* Vertically center the contents */
-  padding: 20px; /* Add padding to create space */
-  box-sizing: border-box; /* Include padding in the total width */
-  margin: 10px;
+  display: flex;
+  flex-direction: row;
 }
 
-.shopNow-category-left {
-  width: 50%; /* Take up half of the container */
-}
-
-.shopNow-category-container-category {
-  margin-bottom: 10px; /* Add some space between category and Shop Now */
-}
-
-.bold-Category {
-  color: black;
-  font-size: large;
-}
-
-.bold-ShopNow {
-  color: black;
-  font-size: small;
-}
-
-.shopNow-category-image-container {
-  width: 45%; /* Adjust to leave some space */
+.shopNow-category-container-1 {
+  width: 50%;
   height: 100%;
-  display: flex; /* Flexbox to center the image */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
-.shopNow-category-image-container img {
-  max-width: 100%; /* Make sure the image doesn't overflow */
-  max-height: 100%; /* Fit the image within the container */
+.category-box-title {
+  display: flex;
+  font-size: 0.8rem;
+  justify-content: center;
+  align-items: center;
+
 }
 
-@media only screen and (max-width: 1260px) {
-  .shopNow-category-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0px;
-    margin-top: 10px;
-  }
+.category-box-image-container {
+  height: 100%;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.category-box-image {
+  height: 150px;
+  width: 150px;
+}
+
+.category-box-shop-now-container {
+  height: 50%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.category-box-shop-now-link {
+  background-color: var(--BLUE-ACCENT);
+  border-radius: 10px;
+  height: 50%;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: small;
+  color: white;
+  cursor: pointer;
 }
