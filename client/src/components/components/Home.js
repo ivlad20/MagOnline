@@ -22,7 +22,7 @@ const Home = () => {
 
   const sampleProducts = [
   {
-    image: "https://via.placeholder.com/300?text=Product+1",
+    image: "./images/controller.png",
     title: "Wireless Headphones",
     category: "Electronics",
     price: 59.99,

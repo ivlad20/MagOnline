@@ -3,6 +3,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: auto; /* în loc de 500px */
-  padding: 60px 0; /* suficient spațiu sus și jos */
+  height: auto;
+  overflow: visible; /* Add this */
+  margin: 0; /* Remove any existing margin */
+  padding: 0; /* Remove any existing padding */
+}
+
+.home-container {
+  overflow: visible;
 }

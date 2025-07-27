@@ -1,25 +1,24 @@
 .carousel-container-products {
   position: relative;
-  max-width: 90vw;
-  width: 100%;
-  overflow: hidden;
-  padding: 0 20px;
-  box-sizing: border-box;
+  width: 100vw; /* Full viewport width */
+  left: 50%; /* Move to center */
+  transform: translateX(-50%); /* Center it */
+  overflow: visible; /* Let content extend beyond */
 }
 
 .carousel-track {
   display: flex;
   gap: 20px;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
+  overflow-y: visible; /* Allow vertical overflow for shadows */
+  padding: 30px 20px; /* Add padding to give space for shadows */
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  background-color: white;
+  scrollbar-width: none; /* Hide scrollbar */
+  -ms-overflow-style: none; /* Hide scrollbar for IE */
 }
 
 .carousel-track::-webkit-scrollbar {
-  display: none;
+  display: none; /* Hide scrollbar for webkit browsers */
 }
 
 .product-card-main-body {
@@ -34,19 +33,26 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
-  background-color: white;
+  background: rgba(255, 255, 255, 0.9);
   border: none;
-  padding: 10px;
-  font-size: 24px;
-  cursor: pointer;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
   border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-arrow-product:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .carousel-arrow-product.left {
-  left: 10px;
+  left: 20px; /* Adjust based on your needs */
 }
 
 .carousel-arrow-product.right {
-  right: 10px;
+  right: 20px; /* Adjust based on your needs */
 }
