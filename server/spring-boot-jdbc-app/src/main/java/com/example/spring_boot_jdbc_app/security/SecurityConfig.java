@@ -60,16 +60,28 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - no authentication required
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/test/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                        // All other endpoints require authentication
+
+                        // 🔓 Permite toate GET și POST pe /products și subrutele sale
+                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/products").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/products/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/user/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/brand/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/subcategory/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/category/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/brand/category/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/category/subcategory/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/price/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 }
