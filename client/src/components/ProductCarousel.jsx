@@ -10,18 +10,27 @@ const ProductCarousel = ({ products }) => {
 
   const updateScrollButtons = () => {
     const el = carouselRef.current;
-    if (!el) return;
+    if (!el) {
+      console.warn("carouselRef.current is null");
+      return;
+    }
 
     setCanScrollLeft(el.scrollLeft > 0);
     setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth);
   };
 
   const scrollLeft = () => {
-    carouselRef.current?.scrollBy({ left: -carouselRef.current.offsetWidth, behavior: "smooth" });
+    carouselRef.current?.scrollBy({
+      left: -carouselRef.current.offsetWidth,
+      behavior: "smooth",
+    });
   };
 
   const scrollRight = () => {
-    carouselRef.current?.scrollBy({ left: carouselRef.current.offsetWidth, behavior: "smooth" });
+    carouselRef.current?.scrollBy({
+      left: carouselRef.current.offsetWidth,
+      behavior: "smooth",
+    });
   };
 
   useEffect(() => {
@@ -37,6 +46,11 @@ const ProductCarousel = ({ products }) => {
       window.removeEventListener("resize", updateScrollButtons);
     };
   }, []);
+
+  useEffect(() => {
+    updateScrollButtons();
+    
+  }, [products]);
 
   return (
     <div className="carousel-container-products">

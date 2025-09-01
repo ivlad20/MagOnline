@@ -6,7 +6,7 @@ const CategoryBox = ({ category, image }) => {
     <div className="shopNow-category-container">
       <div className="shopNow-category-container-1">
         <div className="category-box-title">
-          <h2>Game Joysticks</h2>
+          <h2>{category}</h2>
         </div>
         <div className="category-box-shop-now-container">
           <div className="category-box-shop-now-link">
@@ -15,7 +15,7 @@ const CategoryBox = ({ category, image }) => {
         </div>
       </div>
       <div className="category-box-image-container">
-        <img src="./images/controller.png" alt="category-image" className="category-box-image" />
+        <img src={image} alt="category-image" className="category-box-image" />
       </div>
     </div>
   );

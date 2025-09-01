@@ -1,10 +1,11 @@
 .shopNow-category-container {
   height: 175px;
   width: 30%;
-  background-color: var(--BG_WHITE_ACCENT);
+  background-color: white;
   border-radius: 10px;
   display: flex;
   flex-direction: row;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .shopNow-category-container-1 {

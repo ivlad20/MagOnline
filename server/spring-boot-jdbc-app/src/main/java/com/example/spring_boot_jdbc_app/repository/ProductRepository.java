@@ -1,8 +1,6 @@
 package com.example.spring_boot_jdbc_app.repository;
 
-import com.example.spring_boot_jdbc_app.model.Address;
-import com.example.spring_boot_jdbc_app.model.Product;
-import com.example.spring_boot_jdbc_app.model.User;
+import com.example.spring_boot_jdbc_app.model.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,7 +12,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class ProductRepository {
@@ -122,4 +124,65 @@ public class ProductRepository {
         String sql = "SELECT * FROM products WHERE price >= ? and price <= ?";
         return jdbcTemplate.query(sql, productRowMapper, min, max);
     }
+
+    public List<ProductPlusImages> getRandomProductsPlusImages(Integer count) {
+        // Step 1: Fetch random products
+        String productSql = "SELECT * FROM products ORDER BY RAND() LIMIT ?";
+        List<Product> products = jdbcTemplate.query(productSql, productRowMapper, count);
+
+        List<Integer> productIds = products.stream()
+                .map(Product::id)
+                .toList();
+
+        if (productIds.isEmpty()) return List.of();
+
+        // Step 2: Fetch all images for those product IDs
+        String imageSql = """
+        SELECT product_id, image_url, is_main 
+        FROM images 
+        WHERE product_id IN (%s)
+        """.formatted(
+                productIds.stream().map(String::valueOf).collect(Collectors.joining(","))
+        );
+
+        // Map product_id -> List<ImageData>
+        Map<Integer, List<ImageData>> imageMap = new HashMap<>();
+        jdbcTemplate.query(imageSql, rs -> {
+            int pid = rs.getInt("product_id");
+            String url = rs.getString("image_url");
+            boolean isMain = rs.getBoolean("is_main");
+
+            imageMap.computeIfAbsent(pid, k -> new ArrayList<>())
+                    .add(new ImageData(url, isMain));
+        });
+
+        // Step 3: Build the list of ProductPlusImages
+        return products.stream().map(p -> {
+            List<ImageData> imgs = imageMap.getOrDefault(p.id(), List.of());
+
+            String mainImage = imgs.stream()
+                    .filter(ImageData::isMain)
+                    .map(ImageData::url)
+                    .findFirst()
+                    .orElse(null);
+
+            List<String> additionalImages = imgs.stream()
+                    .filter(i -> !i.isMain())
+                    .map(ImageData::url)
+                    .toList();
+
+            return new ProductPlusImages(
+                    p.id(),
+                    p.brand(),
+                    p.category(),
+                    p.subcategory(),
+                    p.description(),
+                    p.price(),
+                    p.stock(),
+                    mainImage,
+                    additionalImages
+            );
+        }).toList();
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.example.spring_boot_jdbc_app.controller;
 
 import com.example.spring_boot_jdbc_app.model.Product;
+import com.example.spring_boot_jdbc_app.model.ProductPlusImages;
 import com.example.spring_boot_jdbc_app.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -129,5 +130,12 @@ public class ProductController {
             return new ResponseEntity<>(products, HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(products, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/random/{count}")
+    public ResponseEntity<List<ProductPlusImages>> getRandomProducts(@PathVariable Integer count) {
+        List<ProductPlusImages> products = productService.getRandomProductsPlusImages(count);
+        return ResponseEntity.ok(products);
     }
 }

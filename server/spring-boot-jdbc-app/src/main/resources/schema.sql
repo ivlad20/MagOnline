@@ -82,3 +82,15 @@ CREATE TABLE IF NOT EXISTS favorites (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
+
+
+CREATE TABLE images (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        product_id INT NOT NULL,
+                        image_url VARCHAR(255) NOT NULL,
+                        is_main BOOLEAN NOT NULL DEFAULT FALSE,
+                        CONSTRAINT fk_product
+                            FOREIGN KEY (product_id) REFERENCES products(id)
+                                ON DELETE CASCADE
+);
+

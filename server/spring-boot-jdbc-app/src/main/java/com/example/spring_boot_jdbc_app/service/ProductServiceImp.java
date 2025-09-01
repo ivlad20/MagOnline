@@ -1,6 +1,7 @@
 package com.example.spring_boot_jdbc_app.service;
 
 import com.example.spring_boot_jdbc_app.model.Product;
+import com.example.spring_boot_jdbc_app.model.ProductPlusImages;
 import com.example.spring_boot_jdbc_app.model.User;
 import com.example.spring_boot_jdbc_app.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,5 +89,10 @@ public class ProductServiceImp implements ProductService {
     @Override
     public List<Product> getProductsByPriceRange(Integer min, Integer max) {
         return productRepository.getProductsByPriceRange(min, max);
+    }
+
+    @Override
+    public List<ProductPlusImages> getRandomProductsPlusImages(Integer count) {
+        return productRepository.getRandomProductsPlusImages(count);
     }
 }

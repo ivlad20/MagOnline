@@ -10,11 +10,12 @@
   display: flex;
   gap: 20px;
   overflow-x: auto;
-  overflow-y: visible; /* Allow vertical overflow for shadows */
-  padding: 30px 20px; /* Add padding to give space for shadows */
-  scroll-behavior: smooth;
-  scrollbar-width: none; /* Hide scrollbar */
-  -ms-overflow-style: none; /* Hide scrollbar for IE */
+  overflow-y: visible;
+  padding: 30px 20px;
+  scroll-behavior: smooth; 
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  
 }
 
 .carousel-track::-webkit-scrollbar {

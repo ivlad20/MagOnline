@@ -1,6 +1,7 @@
 package com.example.spring_boot_jdbc_app.service;
 
 import com.example.spring_boot_jdbc_app.model.Product;
+import com.example.spring_boot_jdbc_app.model.ProductPlusImages;
 
 import java.util.List;
 
@@ -30,5 +31,5 @@ public interface ProductService {
 
     List<Product> getProductsByPriceRange(Integer min, Integer max);
 
-//    List<Product> getRandom20ProductsPlusImages();
+    List<ProductPlusImages> getRandomProductsPlusImages(Integer count);
 }

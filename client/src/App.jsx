@@ -1,12 +1,13 @@
 import React from "react";
 import "./App.css";
-import Navbar from "./components/components/Navbar";
-import Login from "./components/components/Login";
+import Navbar from "./components/Navbar";
+import Login from "./components/Login";
 import { Routes, Route } from "react-router-dom"; // Import Routes and Route
-import Home from "./components/components/Home"; // Import the Home component
-import Footer from "./components/components/Footer";
-import { AuthProvider } from "./components/components/AuthContext";
-import Account from "./components/components/Account"
+import Home from "./components/Home"; // Import the Home component
+import Footer from "./components/Footer";
+import { AuthProvider } from "./components/AuthContext";
+import Account from "./components/Account"
+import ProductPage from "./components/ProductPage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/account" element={<Account />}></Route> 
+          <Route path="/product" element={<ProductPage />}></Route>
         </Routes>
       </AuthProvider>
       <Footer />

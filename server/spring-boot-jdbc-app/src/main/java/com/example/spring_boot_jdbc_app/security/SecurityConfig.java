@@ -77,6 +77,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/products/brand/category/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products/category/subcategory/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products/price/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/random/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

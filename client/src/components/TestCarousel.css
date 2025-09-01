@@ -1,0 +1,27 @@
+.test-carousel-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+}
+
+.test-carousel-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 10px;
+  padding: 10px;
+  width: 600px;
+  border: 1px solid #ccc;
+}
+
+.test-card {
+  flex: 0 0 auto;
+  width: 200px;
+  height: 150px;
+  background-color: #e2e2e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
