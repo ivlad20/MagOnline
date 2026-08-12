@@ -1,0 +1,8 @@
+.cart-icon-svg path {
+  fill: var(--ACCENT-GREY); /* Initial grey color */
+}
+
+.cart-icon-svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}

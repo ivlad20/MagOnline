@@ -1,0 +1,53 @@
+.dropdown {
+  display: inline-block;
+  width: 150px; /* Adjust as per the design */
+  position: relative;
+  vertical-align: top; /* Align with search bar */
+}
+
+.dropdown-toggle {
+  width: 100%; /* Make toggle button the full width */
+  padding: 12px 16px; /* Adjust padding as needed */
+  height: 48px; /* Set consistent height */
+  background-color: #ffffff;
+  color: #aaa;
+  border: 1px solid #eaeaea;
+  cursor: pointer;
+  box-sizing: border-box; /* Ensures padding is calculated inside the width */
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  width: 100%; /* Match the dropdown width to the toggle button */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+
+  max-height: 0; /* Start with hidden height */
+  opacity: 0; /* Start with hidden opacity */
+  transform: translateY(-10px); /* Start with slight upward shift */
+  transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
+}
+
+/* When menu is open */
+.dropdown-menu.open {
+  max-height: 500px; /* or any maximum height */
+  opacity: 1; /* Make the dropdown visible */
+  transform: translateY(0); /* Reset translation */
+}
+
+.dropdown-item {
+  padding: 10px 20px;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+}
+
+.dropdown-item:hover {
+  background-color: #f1f1f1;
+}

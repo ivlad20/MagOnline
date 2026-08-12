@@ -4,6 +4,13 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Secrets — NU urca parole/configurări sensibile ###
+env-vars.yaml
+application-local.properties
+src/main/resources/application.properties
+*.pem
+*.key
+
 ### STS ###
 .apt_generated
 .classpath
