@@ -8,5 +8,6 @@ public record Product(
         String subcategory,
         String description,
         Float price,
-        Integer stock
+        Integer stock,
+        String title
 ) {}

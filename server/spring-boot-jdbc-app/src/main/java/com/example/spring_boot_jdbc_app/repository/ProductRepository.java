@@ -1,14 +1,12 @@
 package com.example.spring_boot_jdbc_app.repository;
 
 import com.example.spring_boot_jdbc_app.model.*;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -34,13 +32,28 @@ public class ProductRepository {
                 rs.getString("subcategory"),
                 rs.getString("description"),
                 rs.getFloat("price"),
-                rs.getInt("stock")
+                rs.getInt("stock"),
+                rs.getString("title")
         );
     };
 
+    private RowMapper<Product> productPartialRowMapper = (rs, rowNum) ->
+            new Product(
+                    rs.getInt("id"),
+                    0, // seller_id not selected
+                    rs.getString("brand"),
+                    rs.getString("category"),
+                    null, // subcategory not selected
+                    null, // description not selected
+                    rs.getFloat("price"),
+                    0, // stock not selected
+                    rs.getString("title")
+            );
+
+
     public int saveProduct(Product product) {
         // Inserare în tabela products
-        String productSql = "INSERT INTO products (seller_id, brand, category, subcategory, description, price, stock) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String productSql = "INSERT INTO products (seller_id, brand, category, subcategory, description, price, stock, title) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -52,6 +65,7 @@ public class ProductRepository {
             ps.setString(5, product.description());
             ps.setFloat(6, product.price());
             ps.setInt(7, product.stock());
+            ps.setString(8, product.title());
             return ps;
         }, keyHolder);
 
@@ -70,7 +84,7 @@ public class ProductRepository {
     }
 
     public Product updateProduct(Product product) {
-        String sql = "UPDATE products SET seller_id = ?, brand = ?, category = ?, subcategory = ?, description = ?, price = ?, stock = ? WHERE id = ?";
+        String sql = "UPDATE products SET seller_id = ?, brand = ?, category = ?, subcategory = ?, description = ?, price = ?, stock = ?, title = ? WHERE id = ?";
         int rows = jdbcTemplate.update(sql,
                 product.seller_id(),
                 product.brand(),
@@ -79,7 +93,8 @@ public class ProductRepository {
                 product.description(),
                 product.price(),
                 product.stock(),
-                product.id()
+                product.id(),
+                product.title()
         );
 
         return rows == 1 ? getProductById(product.id()) : null;
@@ -128,7 +143,7 @@ public class ProductRepository {
     public List<ProductPlusImages> getRandomProductsPlusImages(Integer count) {
         // Step 1: Fetch random products
         String productSql = "SELECT * FROM products ORDER BY RAND() LIMIT ?";
-        List<Product> products = jdbcTemplate.query(productSql, productRowMapper, count);
+        List<Product> products = jdbcTemplate.query(productSql, productPartialRowMapper, count);
 
         List<Integer> productIds = products.stream()
                 .map(Product::id)
@@ -175,10 +190,8 @@ public class ProductRepository {
                     p.id(),
                     p.brand(),
                     p.category(),
-                    p.subcategory(),
-                    p.description(),
+                    p.title(),
                     p.price(),
-                    p.stock(),
                     mainImage,
                     additionalImages
             );

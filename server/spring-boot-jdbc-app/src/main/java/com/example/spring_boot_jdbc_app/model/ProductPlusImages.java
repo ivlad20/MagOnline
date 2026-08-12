@@ -6,10 +6,8 @@ public record ProductPlusImages(
         Integer id,
         String brand,
         String category,
-        String subcategory,
-        String description,
+        String title,
         Float price,
-        Integer stock,
         String mainImage,
         List<String> images
 

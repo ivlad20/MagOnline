@@ -44,7 +44,8 @@ public class ProductServiceImp implements ProductService {
                     updatedProduct.subcategory(),
                     updatedProduct.description(),
                     updatedProduct.price(),
-                    updatedProduct.stock()
+                    updatedProduct.stock(),
+                    updatedProduct.title()
             );
             return productRepository.updateProduct(prodToUpdate);
         }

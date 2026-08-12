@@ -31,5 +31,6 @@ public interface ProductService {
 
     List<Product> getProductsByPriceRange(Integer min, Integer max);
 
+//    returns only basic info for display on the homepage
     List<ProductPlusImages> getRandomProductsPlusImages(Integer count);
 }
