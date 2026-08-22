@@ -1,19 +1,25 @@
 package com.example.spring_boot_jdbc_app.service;
 
-import com.example.spring_boot_jdbc_app.model.Product;
-import com.example.spring_boot_jdbc_app.model.ProductPlusImages;
-import com.example.spring_boot_jdbc_app.model.User;
-import com.example.spring_boot_jdbc_app.repository.ProductRepository;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.example.spring_boot_jdbc_app.model.Product;
+import com.example.spring_boot_jdbc_app.model.ProductDetail;
+import com.example.spring_boot_jdbc_app.model.ProductImage;
+import com.example.spring_boot_jdbc_app.model.ProductPlusImages;
+import com.example.spring_boot_jdbc_app.repository.ProductImageRepository;
+import com.example.spring_boot_jdbc_app.repository.ProductRepository;
 
 @Service
 public class ProductServiceImp implements ProductService {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    private ProductImageRepository productImageRepository;
 
     @Override
     public int saveProduct(Product product) {
@@ -95,5 +101,15 @@ public class ProductServiceImp implements ProductService {
     @Override
     public List<ProductPlusImages> getRandomProductsPlusImages(Integer count) {
         return productRepository.getRandomProductsPlusImages(count);
+    }
+
+    @Override
+    public int saveProductImage(ProductImage image) {
+        return productImageRepository.saveImage(image);
+    }
+
+    @Override
+    public ProductDetail getProductByIdPlusImages(int id) {
+        return productRepository.getProductByIdPlusImages(id);
     }
 }

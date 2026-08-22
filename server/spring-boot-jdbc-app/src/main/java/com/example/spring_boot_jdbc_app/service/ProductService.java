@@ -1,9 +1,11 @@
 package com.example.spring_boot_jdbc_app.service;
 
-import com.example.spring_boot_jdbc_app.model.Product;
-import com.example.spring_boot_jdbc_app.model.ProductPlusImages;
-
 import java.util.List;
+
+import com.example.spring_boot_jdbc_app.model.Product;
+import com.example.spring_boot_jdbc_app.model.ProductDetail;
+import com.example.spring_boot_jdbc_app.model.ProductImage;
+import com.example.spring_boot_jdbc_app.model.ProductPlusImages;
 
 public interface ProductService {
 
@@ -33,4 +35,8 @@ public interface ProductService {
 
 //    returns only basic info for display on the homepage
     List<ProductPlusImages> getRandomProductsPlusImages(Integer count);
+
+    int saveProductImage(ProductImage image);
+
+    ProductDetail getProductByIdPlusImages(int id);
 }
