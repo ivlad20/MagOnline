@@ -1,16 +1,17 @@
 package com.example.spring_boot_jdbc_app.service;
 
-import com.example.spring_boot_jdbc_app.model.User;
-import com.example.spring_boot_jdbc_app.repository.UserRepository;
-import com.example.spring_boot_jdbc_app.security.JwtUtil;
-import com.example.spring_boot_jdbc_app.security.MyUserDetails;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.example.spring_boot_jdbc_app.model.User;
+import com.example.spring_boot_jdbc_app.repository.UserRepository;
+import com.example.spring_boot_jdbc_app.security.JwtUtil;
+import com.example.spring_boot_jdbc_app.security.MyUserDetails;
 
 @Service
 public class UserServiceImp implements UserService {

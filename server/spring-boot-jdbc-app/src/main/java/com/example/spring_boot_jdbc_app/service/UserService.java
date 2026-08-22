@@ -1,8 +1,8 @@
 package com.example.spring_boot_jdbc_app.service;
 
-import com.example.spring_boot_jdbc_app.model.User;
-
 import java.util.List;
+
+import com.example.spring_boot_jdbc_app.model.User;
 
 public interface UserService {
     // CREATE
