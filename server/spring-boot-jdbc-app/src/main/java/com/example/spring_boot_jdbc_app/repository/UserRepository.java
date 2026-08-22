@@ -1,7 +1,9 @@
 package com.example.spring_boot_jdbc_app.repository;
 
-import com.example.spring_boot_jdbc_app.model.User;
-import com.example.spring_boot_jdbc_app.model.Address;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -12,9 +14,8 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.util.List;
+import com.example.spring_boot_jdbc_app.model.Address;
+import com.example.spring_boot_jdbc_app.model.User;
 
 @Repository
 public class UserRepository {
