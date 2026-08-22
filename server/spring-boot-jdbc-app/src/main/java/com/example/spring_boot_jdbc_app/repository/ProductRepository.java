@@ -1,13 +1,5 @@
 package com.example.spring_boot_jdbc_app.repository;
 
-import com.example.spring_boot_jdbc_app.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
-
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -15,6 +7,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
+import com.example.spring_boot_jdbc_app.model.ImageData;
+import com.example.spring_boot_jdbc_app.model.Product;
+import com.example.spring_boot_jdbc_app.model.ProductDetail;
+import com.example.spring_boot_jdbc_app.model.ProductPlusImages;
 
 @Repository
 public class ProductRepository {
@@ -37,8 +41,8 @@ public class ProductRepository {
         );
     };
 
-    private RowMapper<Product> productPartialRowMapper = (rs, rowNum) ->
-            new Product(
+    private RowMapper<Product> productPartialRowMapper = (rs, rowNum)
+            -> new Product(
                     rs.getInt("id"),
                     0, // seller_id not selected
                     rs.getString("brand"),
@@ -49,7 +53,6 @@ public class ProductRepository {
                     0, // stock not selected
                     rs.getString("title")
             );
-
 
     public int saveProduct(Product product) {
         // Inserare în tabela products
@@ -93,10 +96,9 @@ public class ProductRepository {
                 product.description(),
                 product.price(),
                 product.stock(),
-                product.id(),
-                product.title()
+                product.title(),
+                product.id()
         );
-
         return rows == 1 ? getProductById(product.id()) : null;
     }
 
@@ -140,6 +142,40 @@ public class ProductRepository {
         return jdbcTemplate.query(sql, productRowMapper, min, max);
     }
 
+    public ProductDetail getProductByIdPlusImages(int id) {
+        Product product = getProductById(id); // productRowMapper complet, deja există
+
+        String imageSql = "SELECT image_url, is_main FROM product_images WHERE product_id = ?";
+        List<ImageData> imgs = jdbcTemplate.query(imageSql,
+                (rs, rowNum) -> new ImageData(rs.getString("image_url"), rs.getBoolean("is_main")),
+                id);
+
+        String mainImage = imgs.stream()
+                .filter(ImageData::isMain)
+                .map(ImageData::url)
+                .findFirst()
+                .orElse(null);
+
+        List<String> additionalImages = imgs.stream()
+                .filter(i -> !i.isMain())
+                .map(ImageData::url)
+                .toList();
+
+        return new ProductDetail(
+                product.id(),
+                product.seller_id(),
+                product.brand(),
+                product.category(),
+                product.subcategory(),
+                product.description(),
+                product.price(),
+                product.stock(),
+                product.title(),
+                mainImage,
+                additionalImages
+        );
+    }
+
     public List<ProductPlusImages> getRandomProductsPlusImages(Integer count) {
         // Step 1: Fetch random products
         String productSql = "SELECT * FROM products ORDER BY RAND() LIMIT ?";
@@ -149,12 +185,14 @@ public class ProductRepository {
                 .map(Product::id)
                 .toList();
 
-        if (productIds.isEmpty()) return List.of();
+        if (productIds.isEmpty()) {
+            return List.of();
+        }
 
         // Step 2: Fetch all images for those product IDs
         String imageSql = """
         SELECT product_id, image_url, is_main 
-        FROM images 
+        FROM product_images 
         WHERE product_id IN (%s)
         """.formatted(
                 productIds.stream().map(String::valueOf).collect(Collectors.joining(","))
