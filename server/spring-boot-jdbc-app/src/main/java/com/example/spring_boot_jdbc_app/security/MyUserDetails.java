@@ -1,12 +1,13 @@
 package com.example.spring_boot_jdbc_app.security;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import com.example.spring_boot_jdbc_app.model.User;
 
-import java.util.Collection;
-import java.util.List;
+import com.example.spring_boot_jdbc_app.model.User;
 
 public class MyUserDetails implements UserDetails {
     private final User user;
@@ -27,8 +28,9 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.username(); // Using email as username for authentication
+        return user.username(); 
     }
+
 
     public String getEmail() {
         return user.email();
@@ -62,7 +64,4 @@ public class MyUserDetails implements UserDetails {
         return user.id();
     }
 
-    public String getActualUsername() {
-        return user.username();
-    }
 }
