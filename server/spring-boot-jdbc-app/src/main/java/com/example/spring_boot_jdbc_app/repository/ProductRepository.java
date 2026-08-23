@@ -26,7 +26,7 @@ public class ProductRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private RowMapper<Product> productRowMapper = (rs, rowNum) -> {
+    private final RowMapper<Product> productRowMapper = (rs, rowNum) -> {
 
         return new Product(
                 rs.getInt("id"),
@@ -41,7 +41,7 @@ public class ProductRepository {
         );
     };
 
-    private RowMapper<Product> productPartialRowMapper = (rs, rowNum)
+    private final RowMapper<Product> productPartialRowMapper = (rs, rowNum)
             -> new Product(
                     rs.getInt("id"),
                     0, // seller_id not selected
@@ -181,15 +181,20 @@ public class ProductRepository {
         String productSql = "SELECT * FROM products ORDER BY RAND() LIMIT ?";
         List<Product> products = jdbcTemplate.query(productSql, productPartialRowMapper, count);
 
+        // Step 2: Extract product IDs (stream on empty list returns empty stream → no NPE)
         List<Integer> productIds = products.stream()
                 .map(Product::id)
                 .toList();
 
-        if (productIds.isEmpty()) {
-            return List.of();
-        }
+        // Build IN clause — empty list produces "" which is harmless in this context
+        String imageSql = """
+        SELECT product_id, image_url, is_main 
+        FROM product_images 
+        WHERE product_id IN (%s)
+        """.formatted(
+                productIds.stream().map(String::valueOf).collect(Collectors.joining(","))
+        );
 
-        // Step 2: Fetch all images for those product IDs
         String imageSql = """
         SELECT product_id, image_url, is_main 
         FROM product_images 
