@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.spring_boot_jdbc_app.model.Seller;
 import com.example.spring_boot_jdbc_app.model.User;
 import com.example.spring_boot_jdbc_app.repository.SellerRepository;
-import com.example.spring_boot_jdbc_app.repository.UserRepository;
 import com.example.spring_boot_jdbc_app.security.MyUserDetails;
 
 @CrossOrigin(
@@ -30,7 +29,7 @@ import com.example.spring_boot_jdbc_app.security.MyUserDetails;
 public class SellerController {
 
     @Autowired private SellerRepository sellerRepository;
-    @Autowired private UserRepository userRepository;
+    // @Autowired private UserRepository userRepository;
 
     @GetMapping("/me")
     public ResponseEntity<?> getMyStatus(Authentication authentication) {

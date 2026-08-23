@@ -1,5 +1,6 @@
 // lib/api.ts
 import type { Product, ProductDetail, ProductPlusImages } from "@/types/product";
+import { getToken } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -40,4 +41,25 @@ export function getProductsByCategory(category: string) {
   return apiFetch<Product[]>(`/products/category/${encodeURIComponent(category)}`).then(
     (data) => data ?? []
   );
+}
+
+export async function recordProductView(productId: number): Promise<void> {
+  const token = getToken();
+  if (!token) return;
+
+  await fetch(`${API_URL}/recently-viewed/${productId}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function getRecentlyViewed(): Promise<ProductDetail[]> {
+  const token = getToken();
+  if (!token) return [];
+
+  const res = await fetch(`${API_URL}/recently-viewed`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return [];
+  return res.json();
 }
