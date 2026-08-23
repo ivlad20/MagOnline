@@ -1,4 +1,3 @@
-// page.tsx (ruta produsului)
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
@@ -6,8 +5,8 @@ import Footer from "@/components/Footer";
 import MoltenMetalBG from "@/components/MoltenMetalBG";
 import ProductShowcase from "@/components/ProductShowcase";
 import ProductInfoTabs from "@/components/ProductInfoTabs";
+import RecordProductView from "@/components/RecordProductView";
 import { getProductById } from "@/lib/api";
-
 
 export default async function ProductPage({
   params,
@@ -15,7 +14,7 @@ export default async function ProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const product = await getProductById(id); // trebuie să întoarcă ProductDetail (Product + mainImage/images)
+  const product = await getProductById(id);
 
   if (!product) {
     notFound();
@@ -44,6 +43,8 @@ export default async function ProductPage({
           <Navbar />
 
           <main className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-8">
+            <RecordProductView productId={product.id} />
+
             <nav className="mb-6 text-sm text-white/60">
               <Link href="/" className="hover:text-voltaic">
                 Acasă
@@ -58,10 +59,6 @@ export default async function ProductPage({
             </nav>
 
             <ProductShowcase product={product} />
-
-            <div className="mt-10 pb-16">
-              <ProductInfoTabs product={product} />
-            </div>
 
             <div className="mt-10 pb-16">
               <ProductInfoTabs product={product} />
