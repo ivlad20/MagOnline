@@ -26,6 +26,9 @@ steps:
       - '--image=europe-west3-docker.pkg.dev/project-87c41607-840d-42fa-a1b/magonline-repo/backend:$SHORT_SHA'
       - '--region=europe-west3'
       - '--platform=managed'
+      - '--add-cloudsql-instances=project-87c41607-840d-42fa-a1b:europe-west4:free-trial-first-project'
+      - '--set-env-vars=SPRING_DATASOURCE_URL=jdbc:mysql:///ecommerce?cloudSqlInstance=project-87c41607-840d-42fa-a1b:europe-west4:free-trial-first-project&socketFactory=com.google.cloud.sql.mysql.SocketFactory,SPRING_DATASOURCE_USERNAME=magonline_app'
+      - '--update-secrets=SPRING_DATASOURCE_PASSWORD=db-password:latest'
 
 images:
   - 'europe-west3-docker.pkg.dev/project-87c41607-840d-42fa-a1b/magonline-repo/backend:$SHORT_SHA'
