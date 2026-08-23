@@ -1,4 +1,5 @@
-import type { Product, ProductPlusImages } from "@/types/product";
+// lib/api.ts
+import type { Product, ProductDetail, ProductPlusImages } from "@/types/product";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -32,7 +33,7 @@ export function getRandomProducts(count: number) {
 }
 
 export function getProductById(id: number | string) {
-  return apiFetch<Product>(`/products/${id}`, 30);
+  return apiFetch<ProductDetail>(`/products/${id}/detail`, 30);
 }
 
 export function getProductsByCategory(category: string) {
