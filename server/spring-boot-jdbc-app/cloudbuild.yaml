@@ -1,0 +1,36 @@
+steps:
+  # Build imaginea Docker
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'europe-west3-docker.pkg.dev/project-87c41607-840d-42fa-a1b/magonline-repo/backend:$SHORT_SHA'
+      - '-t'
+      - 'europe-west3-docker.pkg.dev/project-87c41607-840d-42fa-a1b/magonline-repo/backend:latest'
+      - './server/spring-boot-jdbc-app'
+
+  # Push în Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'europe-west3-docker.pkg.dev/project-87c41607-840d-42fa-a1b/magonline-repo/backend'
+
+  # Deploy pe Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'magonline-backend'
+      - '--image=europe-west3-docker.pkg.dev/project-87c41607-840d-42fa-a1b/magonline-repo/backend:$SHORT_SHA'
+      - '--region=europe-west3'
+      - '--platform=managed'
+
+images:
+  - 'europe-west3-docker.pkg.dev/project-87c41607-840d-42fa-a1b/magonline-repo/backend:$SHORT_SHA'
+  - 'europe-west3-docker.pkg.dev/project-87c41607-840d-42fa-a1b/magonline-repo/backend:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  #gcloud builds submit --config cloudbuild.yaml
