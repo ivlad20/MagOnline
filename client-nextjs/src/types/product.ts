@@ -1,4 +1,5 @@
-// lib/api.ts (sau types.ts, oriunde ai definit Product / ProductPlusImages)
+
+// full definition of product model
 
 export interface Product {
   id: number;
@@ -12,21 +13,20 @@ export interface Product {
   title: string;
 }
 
-export interface ProductPlusImages {
-  id: number;
-  brand: string;
-  category: string;
-  title: string;
-  price: number;
+// definition of model product + productImages
+
+export interface ProductPlusImages extends Product {
   mainImage: string | null;
   images: string[];
 }
 
-// types/product.ts — adaugă lângă Product / ProductPlusImages
-export interface ProductDetail extends Product {
+// definition of model Product + mainImage for ProductCard excluding stock, description, subcategory, seller_id
+
+export interface ProductCardInterface extends Pick<Product, "id" | "brand" | "category" | "title" | "price"> {
   mainImage: string | null;
-  images: string[];
 }
+
+//interface for product page which requires besides almost all types from Product also requires ratings and images
 
 export interface ProductShowcaseProps {
   product: {

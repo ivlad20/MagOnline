@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { getRecentlyViewed } from "@/lib/api";
-import { ProductDetail } from "@/types/product";
+import { getRecentlyViewed } from "@/lib/products";
+import { ProductPlusImages } from "@/types/product";
 
 export function useRecentlyViewed() {
   const { user, isLoading: isAuthLoading } = useAuth();
-  const [products, setProducts] = useState<ProductDetail[]>([]);
+  const [products, setProducts] = useState<ProductPlusImages[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

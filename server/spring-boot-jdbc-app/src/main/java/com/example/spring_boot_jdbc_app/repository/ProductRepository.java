@@ -178,6 +178,116 @@ public class ProductRepository {
         );
     }
 
+    public List<ProductPlusImages> searchProducts(String query) {
+        // Step 1: Fetch products matching the fulltext query, ranked by relevance
+        String productSql = """
+        SELECT *, MATCH(title, brand, description) AGAINST (? IN NATURAL LANGUAGE MODE) AS relevance_score
+        FROM products
+        WHERE MATCH(title, brand, description) AGAINST (? IN NATURAL LANGUAGE MODE)
+        ORDER BY relevance_score DESC
+        LIMIT 100
+        """;
+        List<Product> products = jdbcTemplate.query(productSql, productPartialRowMapper, query, query);
+
+        List<Integer> productIds = products.stream()
+                .map(Product::id)
+                .toList();
+
+        if (productIds.isEmpty()) {
+            return List.of();
+        }
+
+        // Step 2: Fetch all images for those product IDs
+        String imageSql = """
+        SELECT product_id, image_url, is_main
+        FROM product_images
+        WHERE product_id IN (%s)
+        """.formatted(
+                productIds.stream().map(String::valueOf).collect(Collectors.joining(","))
+        );
+
+        Map<Integer, List<ImageData>> imageMap = new HashMap<>();
+        jdbcTemplate.query(imageSql, rs -> {
+            int pid = rs.getInt("product_id");
+            String url = rs.getString("image_url");
+            boolean isMain = rs.getBoolean("is_main");
+
+            imageMap.computeIfAbsent(pid, k -> new ArrayList<>())
+                    .add(new ImageData(url, isMain));
+        });
+
+        // Step 3: Build the list of ProductPlusImages
+        return products.stream().map(p -> {
+            List<ImageData> imgs = imageMap.getOrDefault(p.id(), List.of());
+
+            String mainImage = imgs.stream()
+                    .filter(ImageData::isMain)
+                    .map(ImageData::url)
+                    .findFirst()
+                    .orElse(null);
+
+            List<String> additionalImages = imgs.stream()
+                    .filter(i -> !i.isMain())
+                    .map(ImageData::url)
+                    .toList();
+
+            return new ProductPlusImages(
+                    p.id(),
+                    p.brand(),
+                    p.category(),
+                    p.title(),
+                    p.price(),
+                    mainImage,
+                    additionalImages
+            );
+        }).toList();
+    }
+
+    private List<ProductPlusImages> attachImages(List<Product> products) {
+        List<Integer> productIds = products.stream().map(Product::id).toList();
+        if (productIds.isEmpty()) {
+            return List.of();
+        }
+        String imageSql = """
+        SELECT product_id, image_url, is_main
+        FROM product_images
+        WHERE product_id IN (%s)
+        """.formatted(
+                productIds.stream().map(String::valueOf).collect(Collectors.joining(","))
+        );
+        Map<Integer, List<ImageData>> imageMap = new HashMap<>();
+        jdbcTemplate.query(imageSql, rs -> {
+            int pid = rs.getInt("product_id");
+            String url = rs.getString("image_url");
+            boolean isMain = rs.getBoolean("is_main");
+            imageMap.computeIfAbsent(pid, k -> new ArrayList<>()).add(new ImageData(url, isMain));
+        });
+
+        return products.stream().map(p -> {
+            List<ImageData> imgs = imageMap.getOrDefault(p.id(), List.of());
+            String mainImage = imgs.stream().filter(ImageData::isMain).map(ImageData::url).findFirst().orElse(null);
+            List<String> additionalImages = imgs.stream().filter(i -> !i.isMain()).map(ImageData::url).toList();
+            return new ProductPlusImages(p.id(), p.brand(), p.category(), p.title(), p.price(), mainImage, additionalImages);
+        }).toList();
+    }
+
+    public List<ProductPlusImages> getProductsByCategoryPlusImages(String category) {
+        String sql = "SELECT * FROM products WHERE category = ?";
+        List<Product> products = jdbcTemplate.query(sql, productPartialRowMapper, category);
+        return attachImages(products);
+    }
+
+    public List<ProductPlusImages> getProductsByCategoryAndSubcategoryPlusImages(String category, String subcategory) {
+        String sql = "SELECT * FROM products WHERE category = ? AND subcategory = ?";
+        List<Product> products = jdbcTemplate.query(sql, productPartialRowMapper, category, subcategory);
+        return attachImages(products);
+    }
+
+    public List<String> getDistinctSubcategoriesByCategory(String category) {
+        String sql = "SELECT DISTINCT subcategory FROM products WHERE category = ? AND subcategory IS NOT NULL ORDER BY subcategory";
+        return jdbcTemplate.queryForList(sql, String.class, category);
+    }
+
     public List<ProductPlusImages> getRandomProductsPlusImages(Integer count) {
         // Step 1: Fetch random products
         String productSql = "SELECT * FROM products ORDER BY RAND() LIMIT ?";

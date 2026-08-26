@@ -1,18 +1,7 @@
 import { getToken } from "@/lib/auth";
+import { SellerRegistration, SellerStatus } from "@/types/sellers";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-export interface SellerStatus {
-  isSeller: boolean;
-  seller: {
-    userId: number;
-    companyName: string;
-    cui: string | null;
-    address: string | null;
-    phone: string | null;
-    iban: string | null;
-  } | null;
-}
 
 export async function getMySellerStatus(): Promise<SellerStatus> {
   const token = getToken();
@@ -24,14 +13,6 @@ export async function getMySellerStatus(): Promise<SellerStatus> {
 
   if (!res.ok) return { isSeller: false, seller: null };
   return res.json();
-}
-
-export interface SellerRegistration {
-  companyName: string;
-  cui: string;
-  address: string;
-  phone: string;
-  iban: string;
 }
 
 export async function registerAsSeller(payload: SellerRegistration): Promise<void> {

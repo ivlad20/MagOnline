@@ -1,17 +1,9 @@
 import { getToken } from "@/lib/auth";
+import { NewProductPayload } from "@/types/product";
+import { apiFetch } from "./api";
+import { ProductCardInterface, ProductPlusImages, Product } from "@/types/product";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-export interface NewProductPayload {
-  brand: string;
-  category: string;
-  subcategory: string;
-  description: string;
-  price: number;
-  stock: number;
-  title: string;
-  images: File[];
-}
 
 export async function uploadProduct(payload: NewProductPayload): Promise<number> {
   const token = getToken();
@@ -38,4 +30,41 @@ export async function uploadProduct(payload: NewProductPayload): Promise<number>
 
   const data = await res.json();
   return data.productId;
+}
+
+export function getRandomProducts(count: number) {
+  return apiFetch<ProductCardInterface[]>(`/products/random/${count}`).then(
+    (data) => data ?? []
+  );
+}
+
+export function getProductById(id: number | string) {
+  return apiFetch<ProductPlusImages>(`/products/${id}/detail`, 30);
+}
+
+export function getProductsByCategory(category: string) {
+  return apiFetch<Product[]>(`/products/category/${encodeURIComponent(category)}`).then(
+    (data) => data ?? []
+  );
+}
+
+export async function recordProductView(productId: number): Promise<void> {
+  const token = getToken();
+  if (!token) return;
+
+  await fetch(`${API_URL}/recently-viewed/${productId}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function getRecentlyViewed(): Promise<ProductPlusImages[]> {
+  const token = getToken();
+  if (!token) return [];
+
+  const res = await fetch(`${API_URL}/recently-viewed`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return [];
+  return res.json();
 }

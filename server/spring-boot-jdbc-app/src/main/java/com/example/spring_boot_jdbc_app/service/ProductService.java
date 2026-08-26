@@ -39,4 +39,12 @@ public interface ProductService {
     int saveProductImage(ProductImage image);
 
     ProductDetail getProductByIdPlusImages(int id);
+
+    List<ProductPlusImages> searchProducts(String query);
+
+    List<ProductPlusImages> getProductsByCategoryPlusImages(String category);
+
+    List<ProductPlusImages> getProductsByCategoryAndSubcategoryPlusImages(String category, String subcategory);
+
+    List<String> getDistinctSubcategoriesByCategory(String category);
 }

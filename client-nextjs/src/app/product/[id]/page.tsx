@@ -6,7 +6,7 @@ import MoltenMetalBG from "@/components/MoltenMetalBG";
 import ProductShowcase from "@/components/ProductShowcase";
 import ProductInfoTabs from "@/components/ProductInfoTabs";
 import RecordProductView from "@/components/RecordProductView";
-import { getProductById } from "@/lib/api";
+import { getProductById } from "@/lib/products";
 
 export default async function ProductPage({
   params,

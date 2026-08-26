@@ -112,4 +112,24 @@ public class ProductServiceImp implements ProductService {
     public ProductDetail getProductByIdPlusImages(int id) {
         return productRepository.getProductByIdPlusImages(id);
     }
+
+    @Override
+    public List<ProductPlusImages> searchProducts(String query) {
+        return productRepository.searchProducts(query);
+    }
+
+    @Override
+    public List<ProductPlusImages> getProductsByCategoryPlusImages(String category) {
+        return productRepository.getProductsByCategoryPlusImages(category);
+    }
+
+    @Override
+    public List<ProductPlusImages> getProductsByCategoryAndSubcategoryPlusImages(String category, String subcategory) {
+        return productRepository.getProductsByCategoryAndSubcategoryPlusImages(category, subcategory);
+    }
+
+    @Override
+    public List<String> getDistinctSubcategoriesByCategory(String category) {
+        return productRepository.getDistinctSubcategoriesByCategory(category);
+    }
 }

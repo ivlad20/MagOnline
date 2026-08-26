@@ -1,10 +1,20 @@
-import ComingSoon from "@/components/ComingSoon";
+import ListingLayout from "@/components/ListingLayout";
+import { type Product } from "@/components/ProductCard";
+import { fetchSearchResults } from "@/lib/api";
 
-export default function SearchPage() {
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q = "" } = await searchParams;
+  const products = await fetchSearchResults(q);
+
   return (
-    <ComingSoon
-      title="Căutare"
-      description="Rezultatele de căutare vor apărea aici."
+    <ListingLayout
+      heading={q ? `Rezultate pentru "${q}"` : "Căutare produse"}
+      resultCount={products.length}
+      products={products}
     />
   );
 }

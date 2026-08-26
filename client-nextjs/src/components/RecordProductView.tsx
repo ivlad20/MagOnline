@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { recordProductView } from "@/lib/api";
+import { recordProductView } from "@/lib/products";
 
 export default function RecordProductView({ productId }: { productId: number }) {
   const { user } = useAuth();

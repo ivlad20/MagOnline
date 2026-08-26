@@ -51,7 +51,6 @@ public class ProductController {
 
     // @Autowired
     // private UserRepository userRepository;
-
     @Autowired
     private GcsUploadService gcsUploadService;
 
@@ -218,5 +217,14 @@ public class ProductController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(product, HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchProducts(@RequestParam String q) {
+        if (q == null || q.isBlank()) {
+            return new ResponseEntity<>("Parametrul q este obligatoriu.", HttpStatus.BAD_REQUEST);
+        }
+        List<ProductPlusImages> products = productService.searchProducts(q);
+        return ResponseEntity.ok(products); // 200 + listă goală dacă nu sunt rezultate
     }
 }
