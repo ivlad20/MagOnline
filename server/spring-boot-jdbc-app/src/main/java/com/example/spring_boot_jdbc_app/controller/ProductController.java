@@ -168,6 +168,22 @@ public class ProductController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
+    // Listare pentru pagina de categorie (produse + imagini), opțional filtrată după subcategorie
+    @GetMapping("/category/{category}/listing")
+    public ResponseEntity<List<ProductPlusImages>> getCategoryListing(
+            @PathVariable String category,
+            @RequestParam(required = false) String subcategory) {
+        List<ProductPlusImages> products = (subcategory == null || subcategory.isBlank())
+                ? productService.getProductsByCategoryPlusImages(category)
+                : productService.getProductsByCategoryAndSubcategoryPlusImages(category, subcategory);
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/category/{category}/subcategories")
+    public ResponseEntity<List<String>> getSubcategories(@PathVariable String category) {
+        return ResponseEntity.ok(productService.getDistinctSubcategoriesByCategory(category));
+    }
+
     @GetMapping("/subcategory/{subcategory}")
     public ResponseEntity<List<Product>> getProductsBySubcategory(@PathVariable String subcategory) {
         List<Product> products = productService.getProductsBySubcategory(subcategory);
