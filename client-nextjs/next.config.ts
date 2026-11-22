@@ -15,15 +15,15 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "storage.googleapis.com",
       },
-      // Pozele încărcate în backend-ul local (docker compose, app.storage=local)
+      // Images uploaded to the local backend (docker compose, app.storage=local)
       {
         protocol: "http",
         hostname: "localhost",
-        port: "8080",
+        port: "8088",
         pathname: "/uploads/**",
       },
     ],
-    // Next.js blochează implicit optimizarea imaginilor de pe IP-uri locale; o permitem doar în dev.
+    // Next.js blocks optimizing images from local IPs by default; allow it in dev only.
     dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
   },
 };

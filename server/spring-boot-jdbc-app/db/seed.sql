@@ -1,6 +1,7 @@
--- Date demo pentru rularea locală (docker compose).
--- Se încarcă o singură dată, când volumul MySQL e gol (docker compose down -v ca să le reîncarci).
--- Cont demo (are și profil de vânzător): email demo@magonline.local / parolă demo-9337d705
+-- Demo data for local development (docker compose).
+-- Loaded once, when the MySQL volume is empty (run docker compose down -v to reload it).
+-- Demo account (seller + admin): email demo@magonline.local / password demo-9337d705
+-- Second demo customer: ana@magonline.local, same password
 SET NAMES utf8mb4;
 
 INSERT INTO users (id, name, surname, username, email, phone, password) VALUES
@@ -91,7 +92,7 @@ Fiecare curba, fiecare linie, create pentru miscare fluida si portabilitate faci
   (106, 1, 'Sony', 'Console', 'PlayStation', 'Consolă PS5 Pro cu GPU îmbunătățit, ray tracing avansat și upscaling PSSR.', 3899.99, 6, 'Consolă Sony PlayStation 5 Pro, 2TB'),
   (107, 1, 'Nintendo', 'Console', 'Nintendo', 'Noua generație Nintendo Switch, cu ecran de 7.9" și Joy-Con 2 magnetice.', 2399.99, 6, 'Consolă Nintendo Switch 2 + Mario Kart World');
 
--- Pozele sunt servite de frontend din client-nextjs/public/mock/products
+-- Images are served by the frontend from client-nextjs/public/mock/products
 INSERT INTO product_images (product_id, image_url, is_main) VALUES
   (28, '/mock/products/28_1-imagine.webp', TRUE),
   (29, '/mock/products/29_1-imagine.webp', TRUE),
@@ -112,3 +113,70 @@ INSERT INTO product_images (product_id, image_url, is_main) VALUES
   (44, '/mock/products/44_1-imagine.webp', TRUE),
   (45, '/mock/products/45_1-imagine.webp', TRUE),
   (46, '/mock/products/46_1-imagine.webp', TRUE);
+
+-- Demo delivery address and order history for the demo account
+INSERT INTO addresses (street, city, zipcode, apartment, floor, user_id) VALUES
+  ('Str. Exemplului nr. 10', 'București', '010101', '12', '3', 1);
+
+INSERT INTO orders (id, user_id, order_date, status, shipping_name, shipping_phone, shipping_address, delivery_method, payment_method, shipping_cost) VALUES
+  (1, 1, '2026-11-18 14:32:00', 'shipped',   'Demo MagOnline', '0700000000', 'Str. Exemplului nr. 10, Ap. 12, Etaj 3, București, 010101', 'courier', 'cash', 19.99),
+  (2, 1, '2026-10-30 09:15:00', 'delivered', 'Demo MagOnline', '0700000000', 'Str. Exemplului nr. 10, Ap. 12, Etaj 3, București, 010101', 'courier', 'card_on_delivery', 0),
+  (3, 1, '2026-09-12 19:47:00', 'delivered', 'Demo MagOnline', '0700000000', 'Str. Exemplului nr. 10, Ap. 12, Etaj 3, București, 010101', 'locker', 'cash', 0),
+  (4, 1, '2026-08-02 11:05:00', 'cancelled', 'Demo MagOnline', '0700000000', 'Str. Exemplului nr. 10, Ap. 12, Etaj 3, București, 010101', 'courier', 'cash', 0);
+
+INSERT INTO order_items (order_id, product_id, quantity, price)
+SELECT o.order_id, p.id, o.qty, p.price
+FROM (SELECT 1 AS order_id, 34 AS product_id, 1 AS qty
+      UNION ALL SELECT 2, 102, 1
+      UNION ALL SELECT 2, 40, 2
+      UNION ALL SELECT 3, 30, 1
+      UNION ALL SELECT 3, 31, 1
+      UNION ALL SELECT 4, 107, 1) o
+JOIN products p ON p.id = o.product_id;
+
+-- Admin panel: the demo account is also an admin (open /admin after logging in).
+INSERT INTO admins (user_id) VALUES (1);
+
+-- Products in the "Ofertele săptămânii" carousel (editable from /admin/oferte).
+INSERT INTO weekly_offers (product_id, position) VALUES
+  (106, 0), (102, 1), (100, 2), (39, 3), (41, 4), (33, 5), (36, 6), (45, 7);
+
+-- A second demo customer, so the sales dashboard has data. Same password as the demo account.
+-- Order dates are relative to when the database is created, so the charts always show recent sales.
+INSERT INTO users (id, name, surname, username, email, phone, password) VALUES
+  (2, 'Ana', 'Popescu', 'ana.popescu', 'ana@magonline.local', '0722123456', '$2y$10$EB3MNi/26beqTqJDusfRJ.U2gUcedTuHgBPNH6g0JIuAZ6lcWIFj2');
+
+INSERT INTO orders (id, user_id, order_date, status, shipping_name, shipping_phone, shipping_address, delivery_method, payment_method, shipping_cost) VALUES
+  (5,  2, NOW() - INTERVAL 1 DAY  - INTERVAL 3 HOUR, 'pending',    'Ana Popescu', '0722123456', 'Bd. Unirii nr. 5, Cluj-Napoca, 400001', 'courier', 'cash', 0),
+  (6,  2, NOW() - INTERVAL 2 DAY  - INTERVAL 5 HOUR, 'processing', 'Ana Popescu', '0722123456', 'Bd. Unirii nr. 5, Cluj-Napoca, 400001', 'locker', 'card_on_delivery', 12.99),
+  (7,  2, NOW() - INTERVAL 4 DAY,                    'shipped',    'Ana Popescu', '0722123456', 'Bd. Unirii nr. 5, Cluj-Napoca, 400001', 'courier', 'cash', 0),
+  (8,  2, NOW() - INTERVAL 6 DAY,                    'delivered',  'Ana Popescu', '0722123456', 'Bd. Unirii nr. 5, Cluj-Napoca, 400001', 'courier', 'card_on_delivery', 0),
+  (9,  2, NOW() - INTERVAL 9 DAY,                    'delivered',  'Ana Popescu', '0722123456', 'Bd. Unirii nr. 5, Cluj-Napoca, 400001', 'locker', 'cash', 12.99),
+  (10, 2, NOW() - INTERVAL 12 DAY,                   'delivered',  'Ana Popescu', '0722123456', 'Bd. Unirii nr. 5, Cluj-Napoca, 400001', 'courier', 'cash', 0),
+  (11, 2, NOW() - INTERVAL 15 DAY,                   'cancelled',  'Ana Popescu', '0722123456', 'Bd. Unirii nr. 5, Cluj-Napoca, 400001', 'courier', 'cash', 0),
+  (12, 2, NOW() - INTERVAL 18 DAY,                   'delivered',  'Ana Popescu', '0722123456', 'Bd. Unirii nr. 5, Cluj-Napoca, 400001', 'courier', 'card_on_delivery', 0),
+  (13, 2, NOW() - INTERVAL 22 DAY,                   'delivered',  'Ana Popescu', '0722123456', 'Bd. Unirii nr. 5, Cluj-Napoca, 400001', 'locker', 'cash', 12.99),
+  (14, 2, NOW() - INTERVAL 26 DAY,                   'delivered',  'Ana Popescu', '0722123456', 'Bd. Unirii nr. 5, Cluj-Napoca, 400001', 'courier', 'cash', 0),
+  (15, 2, NOW() - INTERVAL 33 DAY,                   'delivered',  'Ana Popescu', '0722123456', 'Bd. Unirii nr. 5, Cluj-Napoca, 400001', 'courier', 'cash', 0),
+  (16, 2, NOW() - INTERVAL 41 DAY,                   'delivered',  'Ana Popescu', '0722123456', 'Bd. Unirii nr. 5, Cluj-Napoca, 400001', 'courier', 'card_on_delivery', 0);
+
+INSERT INTO order_items (order_id, product_id, quantity, price)
+SELECT o.order_id, p.id, o.qty, p.price
+FROM (SELECT 5 AS order_id, 106 AS product_id, 1 AS qty
+      UNION ALL SELECT 6, 38, 2
+      UNION ALL SELECT 6, 40, 1
+      UNION ALL SELECT 7, 103, 1
+      UNION ALL SELECT 8, 39, 1
+      UNION ALL SELECT 8, 34, 1
+      UNION ALL SELECT 9, 29, 1
+      UNION ALL SELECT 10, 36, 1
+      UNION ALL SELECT 10, 37, 1
+      UNION ALL SELECT 10, 35, 1
+      UNION ALL SELECT 11, 100, 1
+      UNION ALL SELECT 12, 41, 1
+      UNION ALL SELECT 13, 42, 1
+      UNION ALL SELECT 14, 33, 1
+      UNION ALL SELECT 15, 105, 1
+      UNION ALL SELECT 16, 107, 1
+      UNION ALL SELECT 16, 34, 1) o
+JOIN products p ON p.id = o.product_id;

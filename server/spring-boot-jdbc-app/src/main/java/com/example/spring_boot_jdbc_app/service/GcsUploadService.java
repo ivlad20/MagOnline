@@ -15,9 +15,9 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
 /**
- * Salvează pozele produselor.
- * - app.storage=gcs   (implicit): bucket-ul Google Cloud Storage
- * - app.storage=local : pe disc, în app.storage.local-dir, servite la {app.public-url}/uploads/...
+ * Stores product images.
+ * - app.storage=gcs   (default): the Google Cloud Storage bucket
+ * - app.storage=local : on disk in app.storage.local-dir, served at {app.public-url}/uploads/...
  */
 @Service
 public class GcsUploadService {
@@ -27,7 +27,7 @@ public class GcsUploadService {
     private final String mode;
     private final Path localDir;
     private final String publicUrl;
-    private Storage storage; // creat doar la nevoie, ca să nu ceară credențiale GCP local
+    private Storage storage; // created lazily so local runs don't need GCP credentials
 
     public GcsUploadService(
             @Value("${app.storage:gcs}") String mode,
@@ -43,7 +43,7 @@ public class GcsUploadService {
             Files.createDirectories(localDir);
             Path target = localDir.resolve(filename).normalize();
             if (!target.startsWith(localDir)) {
-                throw new IOException("Nume de fișier invalid: " + filename);
+                throw new IOException("Invalid file name: " + filename);
             }
             Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
             return publicUrl + "/uploads/" + filename;

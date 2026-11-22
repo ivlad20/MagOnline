@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ImageOff, Star } from "lucide-react";
+import FavoriteButton from "./FavoriteButton";
 
 export interface Product {
   id: string | number;
@@ -45,6 +46,10 @@ export default function ProductCard({ product }: { product: Product }) {
             -{discount}%
           </span>
         )}
+        <FavoriteButton
+          product={{ id, title, price, mainImage, brand, category }}
+          className="absolute right-3 top-3"
+        />
       </div>
 
       <div className="flex flex-1 flex-col gap-1 p-4 min-h-[160px]">

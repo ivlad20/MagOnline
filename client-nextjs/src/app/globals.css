@@ -19,7 +19,7 @@
   --color-ink: #121A2B;
   --color-ink-soft: #4E5B70;
 
-  /* Aliasuri vechi, ca restul componentelor să preia paleta nouă */
+  /* Legacy aliases so older components pick up the new palette */
   --color-voltaic: #0F2042;
   --color-voltaic-deep: #091530;
   --color-voltaic-light: #4A6A8C;

@@ -1,5 +1,6 @@
 package com.example.spring_boot_jdbc_app.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,11 @@ public class SellerController {
         User user = ((MyUserDetails) authentication.getPrincipal()).getUser();
 
         Seller seller = sellerRepository.getSellerByUserId(user.id());
-        return ResponseEntity.ok(Map.of("isSeller", seller != null, "seller", seller));
+        // HashMap, not Map.of: "seller" is null for non-sellers and Map.of rejects null values (was a 500).
+        Map<String, Object> body = new HashMap<>();
+        body.put("isSeller", seller != null);
+        body.put("seller", seller);
+        return ResponseEntity.ok(body);
     }
 
     @PostMapping("/register")

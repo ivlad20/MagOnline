@@ -17,12 +17,16 @@ import {
   Headphones,
   Package,
   LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { CATEGORIES, categoryHref } from "@/lib/categories";
+import { useCartCount, useShop } from "@/lib/shopStore";
 
 export default function Navbar() {
   const auth = useAuth();
+  const cartCount = useCartCount();
+  const favCount = useShop().favorites.length;
   const [menuOpen, setMenuOpen] = useState(false);
   const [active, setActive] = useState(0);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -35,7 +39,7 @@ export default function Navbar() {
     if (!menuOpen) hoverOpenedAt.current = Date.now();
     setMenuOpen(true);
   };
-  // Hover-ul deschide meniul chiar înainte de click; un click imediat după nu trebuie să-l închidă.
+  // Hovering opens the menu right before the click lands; a click right after must not close it.
   const toggleMenu = () => {
     if (menuOpen && Date.now() - hoverOpenedAt.current < 600) return;
     setMenuOpen((o) => !o);
@@ -64,7 +68,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Bandă de utilitare */}
+      {/* Utility strip */}
       <div className="hidden bg-navy-deep text-xs text-white/70 md:block">
         <div className="mx-auto flex h-9 max-w-[1400px] items-center justify-between px-8">
           <div className="flex items-center gap-6">
@@ -78,13 +82,13 @@ export default function Navbar() {
             </span>
           </div>
           <div className="flex items-center gap-5">
-            <Link href="/sell_product" className="hover:text-white">
+            <Link href={auth.isSeller ? "/sell_product" : "/devino-vanzator"} className="hover:text-white">
               {auth.isSeller ? "Vinde produse" : "Devino vânzător"}
             </Link>
             <Link href="/livrare" className="hover:text-white">
               Livrare & retur
             </Link>
-            <Link href="/despre#contact" className="flex items-center gap-1.5 hover:text-white">
+            <Link href="/contact" className="flex items-center gap-1.5 hover:text-white">
               <Headphones className="h-3.5 w-3.5" />
               Contact
             </Link>
@@ -104,7 +108,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Buton mega-meniu */}
+          {/* Mega-menu button */}
           <div onMouseEnter={openMenu} onMouseLeave={scheduleClose} className="relative">
             <button
               type="button"
@@ -120,7 +124,7 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Căutare */}
+          {/* Search */}
           <form role="search" action="/search" className="hidden flex-1 md:flex">
             <div className="flex w-full overflow-hidden rounded-lg bg-white ring-crimson focus-within:ring-2">
               <input
@@ -139,7 +143,7 @@ export default function Navbar() {
             </div>
           </form>
 
-          {/* Acțiuni */}
+          {/* Actions */}
           <nav className="ml-auto flex items-center gap-1 sm:gap-2 md:ml-0">
             <div
               className="relative"
@@ -169,12 +173,17 @@ export default function Navbar() {
                     <Link href="/cont" onClick={closeAll} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-seal-soft">
                       <User className="h-4 w-4 text-seal" /> Profilul meu
                     </Link>
-                    <Link href="/orders" onClick={closeAll} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-seal-soft">
+                    <Link href="/comenzi" onClick={closeAll} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-seal-soft">
                       <Package className="h-4 w-4 text-seal" /> Comenzile mele
                     </Link>
-                    <Link href="/sell_product" onClick={closeAll} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-seal-soft">
+                    <Link href={auth.isSeller ? "/sell_product" : "/devino-vanzator"} onClick={closeAll} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-seal-soft">
                       <Store className="h-4 w-4 text-seal" /> {auth.isSeller ? "Vinde produse" : "Devino vânzător"}
                     </Link>
+                    {auth.isAdmin && (
+                      <Link href="/admin" onClick={closeAll} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-navy hover:bg-seal-soft">
+                        <LayoutDashboard className="h-4 w-4 text-crimson" /> Panou admin
+                      </Link>
+                    )}
                     <hr className="my-2 border-mist" />
                     <button
                       type="button"
@@ -196,7 +205,14 @@ export default function Navbar() {
               onClick={closeAll}
               className="flex items-center gap-2 rounded-lg px-2.5 py-2 transition-colors hover:bg-white/10"
             >
-              <Heart className="h-6 w-6" />
+              <span className="relative">
+                <Heart className="h-6 w-6" />
+                {favCount > 0 && (
+                  <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-navy">
+                    {favCount}
+                  </span>
+                )}
+              </span>
               <span className="hidden text-sm font-semibold xl:inline">Favorite</span>
             </Link>
 
@@ -207,16 +223,18 @@ export default function Navbar() {
             >
               <span className="relative">
                 <ShoppingCart className="h-6 w-6" />
-                <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-crimson px-1 text-[10px] font-bold">
-                  0
-                </span>
+                {cartCount > 0 && (
+                  <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-crimson px-1 text-[10px] font-bold">
+                    {cartCount}
+                  </span>
+                )}
               </span>
               <span className="hidden text-sm font-semibold xl:inline">Coșul meu</span>
             </Link>
           </nav>
         </div>
 
-        {/* Căutare pe mobil */}
+        {/* Mobile search */}
         <form role="search" action="/search" className="px-4 pb-3 md:hidden">
           <div className="flex overflow-hidden rounded-lg bg-white">
             <input
@@ -231,7 +249,7 @@ export default function Navbar() {
           </div>
         </form>
 
-        {/* Mega-meniu */}
+        {/* Mega-menu */}
         {menuOpen && (
           <div
             id="mega-menu"
@@ -241,7 +259,7 @@ export default function Navbar() {
           >
             <div className="mx-auto max-w-[1400px] px-0 sm:px-8">
               <div className="flex max-h-[calc(100vh-140px)] overflow-hidden bg-white text-ink shadow-2xl sm:rounded-b-2xl">
-                {/* Categorii principale */}
+                {/* Main categories */}
                 <ul className="w-full shrink-0 overflow-y-auto border-r border-mist bg-paper-dim py-2 sm:w-72">
                   {CATEGORIES.map((cat, i) => {
                     const Icon = cat.icon;
@@ -268,7 +286,7 @@ export default function Navbar() {
                   })}
                 </ul>
 
-                {/* Subcategorii */}
+                {/* Subcategories */}
                 <div className="hidden flex-1 gap-8 overflow-y-auto p-8 sm:flex">
                   <div className="flex-1">
                     <div className="mb-5 flex items-baseline justify-between gap-4 border-b border-mist pb-4">
@@ -320,7 +338,7 @@ export default function Navbar() {
         )}
       </header>
 
-      {/* Fundal întunecat cât e deschis meniul */}
+      {/* Dim the page while the menu is open */}
       {menuOpen && (
         <div
           aria-hidden

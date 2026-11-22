@@ -51,6 +51,14 @@ CREATE TABLE IF NOT EXISTS orders (
     user_id INT NOT NULL,
     order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(50) DEFAULT 'pending',
+    -- Delivery details captured at checkout (a snapshot, so later profile edits don't change past orders)
+    shipping_name VARCHAR(200),
+    shipping_phone VARCHAR(20),
+    shipping_address VARCHAR(400),
+    delivery_method VARCHAR(30),
+    payment_method VARCHAR(30),
+    shipping_cost DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    notes VARCHAR(500),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -86,7 +94,7 @@ CREATE TABLE IF NOT EXISTS favorites (
 );
 
 
--- SELLERS TABLE (un user poate deveni vânzător)
+-- SELLERS TABLE (a user can become a seller)
 CREATE TABLE IF NOT EXISTS sellers (
     user_id INT PRIMARY KEY,
     company_name VARCHAR(150) NOT NULL,
@@ -97,7 +105,7 @@ CREATE TABLE IF NOT EXISTS sellers (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- RECENTLY VIEWED TABLE (un rând per user + produs, actualizat la fiecare vizualizare)
+-- RECENTLY VIEWED TABLE (one row per user + product, refreshed on every view)
 CREATE TABLE IF NOT EXISTS recently_viewed (
     user_id INT NOT NULL,
     product_id INT NOT NULL,
@@ -105,5 +113,30 @@ CREATE TABLE IF NOT EXISTS recently_viewed (
     PRIMARY KEY (user_id, product_id),
     INDEX idx_recently_viewed_user (user_id, viewed_at),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
+-- Messages sent from the contact page
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    subject VARCHAR(100),
+    order_number VARCHAR(30),
+    message TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ADMINS (a user listed here gets ROLE_ADMIN and can open /admin)
+CREATE TABLE IF NOT EXISTS admins (
+    user_id INT PRIMARY KEY,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- WEEKLY OFFERS (products shown in the home page carousel, in `position` order)
+CREATE TABLE IF NOT EXISTS weekly_offers (
+    product_id INT PRIMARY KEY,
+    position INT NOT NULL DEFAULT 0,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );

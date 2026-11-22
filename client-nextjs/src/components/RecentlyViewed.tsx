@@ -8,8 +8,8 @@ const STORAGE_KEY = "magonline:recently-viewed";
 const MAX_ITEMS = 12;
 
 /**
- * Apelează asta din pagina de detaliu produs (ex. în useEffect),
- * ca produsul vizitat să apară aici data viitoare.
+ * Call this from the product detail page (e.g. in useEffect)
+ * so the visited product shows up here next time.
  */
 export function trackProductView(product: Product) {
   if (typeof window === "undefined") return;
@@ -23,7 +23,7 @@ export function trackProductView(product: Product) {
     );
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
-    // localStorage indisponibil (mod privat etc.) — ignorăm silențios
+    // localStorage unavailable (private mode etc.) — ignore silently
   }
 }
 

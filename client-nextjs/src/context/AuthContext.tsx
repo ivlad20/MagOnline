@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from "rea
 import { getToken, saveToken, clearToken } from "@/lib/auth";
 import { decodeToken, isTokenExpired } from "@/lib/jwt";
 import { getMySellerStatus } from "@/lib/sellers";
+import { getMyProfile } from "@/lib/account";
 
 interface AuthUser {
   email: string;
@@ -13,6 +14,8 @@ interface AuthUser {
 interface AuthContextValue {
   user: AuthUser | null;
   isSeller: boolean;
+  /** UI hint only; the backend checks admin rights on every /admin request. */
+  isAdmin: boolean;
   isLoading: boolean;
   login: (token: string) => void;
   logout: () => void;
@@ -24,6 +27,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isSeller, setIsSeller] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshSellerStatus = useCallback(async () => {
@@ -36,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!token) {
         setUser(null);
         setIsSeller(false);
+        setIsAdmin(false);
         return;
       }
       const decoded = decodeToken(token);
@@ -43,10 +48,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearToken();
         setUser(null);
         setIsSeller(false);
+        setIsAdmin(false);
         return;
       }
       setUser({ email: decoded.sub, username: decoded.username });
-      await refreshSellerStatus();
+      await Promise.all([
+        refreshSellerStatus(),
+        getMyProfile()
+          .then((p) => setIsAdmin(Boolean(p.admin)))
+          .catch(() => setIsAdmin(false)),
+      ]);
     },
     [refreshSellerStatus]
   );
@@ -58,7 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     (token: string) => {
       saveToken(token);
-      hydrateFromToken(token);
+      // Stay "loading" until the seller status is known, so guarded pages don't redirect on a stale isSeller=false.
+      setIsLoading(true);
+      hydrateFromToken(token).finally(() => setIsLoading(false));
     },
     [hydrateFromToken]
   );
@@ -67,10 +80,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearToken();
     setUser(null);
     setIsSeller(false);
+    setIsAdmin(false);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isSeller, isLoading, login, logout, refreshSellerStatus }}>
+    <AuthContext.Provider value={{ user, isSeller, isAdmin, isLoading, login, logout, refreshSellerStatus }}>
       {children}
     </AuthContext.Provider>
   );

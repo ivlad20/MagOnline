@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.example.spring_boot_jdbc_app.service.GcsUploadService;
 
-/** În modul app.storage=local, servește pozele încărcate la /uploads/**. */
+/** In app.storage=local mode, serves uploaded images under /uploads/**. */
 @Configuration
 public class UploadsConfig implements WebMvcConfigurer {
 

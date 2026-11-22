@@ -30,7 +30,7 @@ public class RecentlyViewedService {
         List<ProductDetail> products = new ArrayList<>();
         for (Integer id : productIds) {
             ProductDetail product = productService.getProductByIdPlusImages(id);
-            if (product != null) { // produsul ar putea fi șters între timp
+            if (product != null) { // the product may have been deleted in the meantime
                 products.add(product);
             }
         }

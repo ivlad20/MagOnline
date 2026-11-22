@@ -1,269 +1,324 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronDown, CircleCheck, ImagePlus, Star, X } from "lucide-react";
+import { Field, FormMessage, inputClass } from "@/components/account/FormField";
 import { useAuth } from "@/context/AuthContext";
-import { registerAsSeller } from "@/lib/sellers";
+import { friendlyError } from "@/lib/account";
+import { CATEGORIES } from "@/lib/categories";
 import { uploadProduct } from "@/lib/products";
 
-export default function SellerPage() {
-  const { user, isSeller, isLoading, refreshSellerStatus } = useAuth();
+const MAX_IMAGES = 8;
+const MAX_IMAGE_MB = 5;
+const MAX_DESCRIPTION = 3000;
+
+/** Same card as the login and "Devino vânzător" pages, just wider. */
+const cardClass =
+  "w-full max-w-2xl rounded-2xl border border-mist bg-white p-6 text-ink shadow-[0_8px_30px_rgba(15,32,66,0.08)] sm:p-10";
+
+export default function SellProductPage() {
+  const { user, isSeller, isLoading } = useAuth();
   const router = useRouter();
 
-  if (isLoading) return null;
-  if (!user) {
-    router.push("/login");
-    return null;
+  // Guests log in first; logged-in non-sellers register on /devino-vanzator.
+  useEffect(() => {
+    if (isLoading) return;
+    if (!user) router.replace("/login?next=/sell_product");
+    else if (!isSeller) router.replace("/devino-vanzator");
+  }, [isLoading, user, isSeller, router]);
+
+  return (
+    <div className="flex min-h-[calc(100vh-200px)] justify-center bg-white px-4 py-12 sm:py-16">
+      {isLoading || !user || !isSeller ? (
+        <div className="mt-24 h-8 w-8 animate-spin rounded-full border-2 border-mist border-t-crimson" aria-label="Se încarcă" />
+      ) : (
+        <AddProductForm />
+      )}
+    </div>
+  );
+}
+
+interface PickedImage {
+  file: File;
+  url: string;
+}
+
+const EMPTY_FORM = { title: "", brand: "", category: "", subcategory: "", description: "", price: "", stock: "1" };
+
+function AddProductForm() {
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [images, setImages] = useState<PickedImage[]>([]);
+  const [dragOver, setDragOver] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [createdId, setCreatedId] = useState<number | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  // Revoke preview URLs when the form unmounts.
+  const imagesRef = useRef(images);
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
+  useEffect(() => () => imagesRef.current.forEach((i) => URL.revokeObjectURL(i.url)), []);
+
+  const category = CATEGORIES.find((c) => c.value === form.category);
+
+  const update =
+    (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setForm((f) => ({ ...f, [field]: e.target.value }));
+
+  const addFiles = (files: FileList | File[]) => {
+    setError(null);
+    const list = Array.from(files);
+    const valid = list.filter((f) => f.type.startsWith("image/") && f.size <= MAX_IMAGE_MB * 1024 * 1024);
+    if (valid.length < list.length) {
+      setError(`Am ignorat fișierele care nu sunt imagini sau depășesc ${MAX_IMAGE_MB} MB.`);
+    }
+    setImages((prev) => {
+      const room = MAX_IMAGES - prev.length;
+      if (valid.length > room) setError(`Poți adăuga cel mult ${MAX_IMAGES} imagini.`);
+      return [...prev, ...valid.slice(0, Math.max(0, room)).map((file) => ({ file, url: URL.createObjectURL(file) }))];
+    });
+  };
+
+  const removeImage = (index: number) =>
+    setImages((prev) => {
+      URL.revokeObjectURL(prev[index].url);
+      return prev.filter((_, i) => i !== index);
+    });
+
+  const makeMain = (index: number) =>
+    setImages((prev) => [prev[index], ...prev.filter((_, i) => i !== index)]);
+
+  const reset = () => {
+    images.forEach((i) => URL.revokeObjectURL(i.url));
+    setImages([]);
+    setForm(EMPTY_FORM);
+    setCreatedId(null);
+    setError(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    const price = parseFloat(form.price.replace(",", "."));
+    const stock = parseInt(form.stock, 10);
+    if (!(price > 0)) return setError("Introdu un preț mai mare decât 0.");
+    if (!(stock >= 0)) return setError("Stocul nu poate fi negativ.");
+    if (images.length === 0) return setError("Adaugă cel puțin o imagine. Prima va fi imaginea principală.");
+
+    setLoading(true);
+    try {
+      const id = await uploadProduct({
+        title: form.title.trim(),
+        brand: form.brand.trim(),
+        category: form.category,
+        subcategory: form.subcategory,
+        description: form.description.trim(),
+        price: Math.round(price * 100) / 100,
+        stock,
+        images: images.map((i) => i.file),
+      });
+      setCreatedId(id);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      setError(friendlyError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (createdId !== null) {
+    return (
+      <div className={`${cardClass} mt-8 h-fit max-w-md text-center`}>
+        <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+          <CircleCheck className="h-7 w-7" />
+        </span>
+        <h1 className="mb-2 font-display text-2xl font-semibold text-navy">Produs publicat</h1>
+        <p className="mb-6 text-sm text-ink-soft">„{form.title}” este acum vizibil pentru cumpărători.</p>
+        <Link
+          href={`/product/${createdId}`}
+          className="block rounded-lg bg-crimson px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-crimson-deep"
+        >
+          Vezi pagina produsului
+        </Link>
+        <button type="button" onClick={reset} className="mt-4 text-sm text-ink-soft hover:text-crimson">
+          Adaugă alt produs
+        </button>
+      </div>
+    );
   }
 
   return (
-    <div className="relative w-full overflow-hidden bg-gradient-to-br from-navy-deep via-navy to-seal">
-      <div className="relative z-10 flex min-h-[calc(100vh-100px)] flex-col">
+    <div className={`${cardClass} h-fit`}>
+      <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-crimson">Vânzători</p>
+      <h1 className="mb-2 font-display text-2xl font-semibold text-navy">Adaugă un produs</h1>
+      <p className="mb-8 text-sm text-ink-soft">Completează detaliile și adaugă câteva fotografii clare. Produsul apare imediat pe site.</p>
 
-        <main className="flex flex-1 items-center justify-center px-4 py-16">
-          {isSeller ? <AddProductForm /> : <BecomeSellerForm onSuccess={refreshSellerStatus} />}
-        </main>
-      </div>
-    </div>
-  );
-}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+        <section className="flex flex-col gap-4">
+          <h2 className="text-sm font-semibold text-navy">Detalii</h2>
+          <Field label="Titlu" htmlFor="pr-title">
+            <input id="pr-title" required maxLength={255} placeholder="ex. Laptop ASUS Vivobook 15, 16GB RAM, 512GB SSD" value={form.title} onChange={update("title")} className={inputClass} />
+          </Field>
+          <Field label="Brand" htmlFor="pr-brand">
+            <input id="pr-brand" required maxLength={100} placeholder="ex. ASUS" value={form.brand} onChange={update("brand")} className={inputClass} />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Categorie" htmlFor="pr-category">
+              <Select
+                id="pr-category"
+                value={form.category}
+                onChange={(e) => setForm((f) => ({ ...f, category: e.target.value, subcategory: "" }))}
+              >
+                <option value="" disabled>Alege categoria</option>
+                {CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Subcategorie" htmlFor="pr-subcategory">
+              <Select id="pr-subcategory" value={form.subcategory} onChange={update("subcategory")} disabled={!category}>
+                <option value="" disabled>{category ? "Alege subcategoria" : "Alege întâi categoria"}</option>
+                {category?.subcategories.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+          <Field label="Descriere" htmlFor="pr-description" hint={`${form.description.length}/${MAX_DESCRIPTION} caractere`}>
+            <textarea
+              id="pr-description"
+              required
+              rows={6}
+              maxLength={MAX_DESCRIPTION}
+              placeholder="Caracteristici, starea produsului, ce conține pachetul..."
+              value={form.description}
+              onChange={update("description")}
+              className={`${inputClass} resize-y`}
+            />
+          </Field>
+        </section>
 
-function BecomeSellerForm({ onSuccess }: { onSuccess: () => Promise<void> }) {
-  const [form, setForm] = useState({ companyName: "", cui: "", address: "", phone: "", iban: "" });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+        <section className="flex flex-col gap-4">
+          <h2 className="text-sm font-semibold text-navy">Preț și stoc</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Preț" htmlFor="pr-price">
+              <div className="relative">
+                <input id="pr-price" required inputMode="decimal" placeholder="0,00" value={form.price} onChange={update("price")} className={`${inputClass} pr-12`} />
+                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-ink-soft">lei</span>
+              </div>
+            </Field>
+            <Field label="Bucăți în stoc" htmlFor="pr-stock">
+              <input id="pr-stock" required type="number" min={0} step={1} value={form.stock} onChange={update("stock")} className={inputClass} />
+            </Field>
+          </div>
+        </section>
 
-  const update = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((f) => ({ ...f, [field]: e.target.value }));
+        <section className="flex flex-col gap-4">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-sm font-semibold text-navy">Fotografii</h2>
+            <span className="text-xs text-ink-soft">{images.length}/{MAX_IMAGES}</span>
+          </div>
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-    try {
-      await registerAsSeller(form);
-      await onSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "A apărut o eroare.");
-    } finally {
-      setLoading(false);
-    }
-  };
+          {images.length < MAX_IMAGES && (
+            <button
+              type="button"
+              onClick={() => fileInput.current?.click()}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOver(true);
+              }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragOver(false);
+                addFiles(e.dataTransfer.files);
+              }}
+              className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-8 text-center transition-colors ${
+                dragOver ? "border-crimson bg-crimson-soft/40" : "border-mist hover:border-seal-light hover:bg-paper"
+              }`}
+            >
+              <ImagePlus className="h-7 w-7 text-seal" />
+              <span className="text-sm font-medium text-navy">Trage imaginile aici sau alege-le din calculator</span>
+              <span className="text-xs text-ink-soft">JPG, PNG sau WEBP, maximum {MAX_IMAGE_MB} MB fiecare</span>
+            </button>
+          )}
+          <input
+            ref={fileInput}
+            type="file"
+            accept="image/*"
+            multiple
+            hidden
+            onChange={(e) => {
+              if (e.target.files) addFiles(e.target.files);
+              e.target.value = "";
+            }}
+          />
 
-  return (
-    <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-      <h1 className="mb-6 font-display text-2xl font-semibold text-white">Devino seller</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input required placeholder="Nume firmă" value={form.companyName} onChange={update("companyName")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
-        <input required placeholder="CUI" value={form.cui} onChange={update("cui")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
-        <input required placeholder="Adresă" value={form.address} onChange={update("address")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
-        <input required placeholder="Telefon" value={form.phone} onChange={update("phone")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
-        <input required placeholder="IBAN" value={form.iban} onChange={update("iban")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
-        {error && <p className="text-sm text-red-300">{error}</p>}
-        <button type="submit" disabled={loading} className="mt-2 rounded-full bg-crimson px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crimson-deep disabled:opacity-50">
-          {loading ? "Se procesează..." : "Trimite"}
-        </button>
+          {images.length > 0 && (
+            <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+              {images.map((img, i) => (
+                <li key={img.url} className="group relative aspect-square overflow-hidden rounded-xl border border-mist bg-white">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img.url} alt={`Imaginea ${i + 1}`} className="h-full w-full object-contain p-1" />
+                  {i === 0 ? (
+                    <span className="absolute bottom-1.5 left-1.5 rounded-md bg-navy px-2 py-0.5 text-[10px] font-semibold text-white">
+                      Principală
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => makeMain(i)}
+                      title="Setează ca imagine principală"
+                      aria-label={`Setează imaginea ${i + 1} ca principală`}
+                      className="absolute bottom-1.5 left-1.5 flex h-7 w-7 items-center justify-center rounded-md bg-white/90 text-ink-soft shadow-sm transition-colors hover:text-crimson"
+                    >
+                      <Star className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    aria-label={`Elimină imaginea ${i + 1}`}
+                    className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-md bg-white/90 text-ink-soft shadow-sm transition-colors hover:text-crimson"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {error && <FormMessage kind="error">{error}</FormMessage>}
+
+        <div className="flex flex-col-reverse items-center gap-3 border-t border-mist pt-6 sm:flex-row sm:justify-between">
+          <Link href="/cont" className="text-sm text-ink-soft hover:text-crimson">
+            Renunță
+          </Link>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-lg bg-crimson px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-crimson-deep disabled:opacity-50 sm:w-auto"
+          >
+            {loading ? "Se publică..." : "Publică produsul"}
+          </button>
+        </div>
       </form>
     </div>
   );
 }
 
-/** Number input with custom white chevron steppers, no background, native spinners hidden. */
-function NumberField({
-  placeholder,
-  value,
-  onChange,
-  step,
-}: {
-  placeholder: string;
-  value: string;
-  onChange: (v: string) => void;
-  step?: string;
-}) {
-  const bump = (delta: number) => {
-    const current = parseFloat(value || "0");
-    const stepNum = step ? parseFloat(step) : 1;
-    const next = (isNaN(current) ? 0 : current) + delta * stepNum;
-    const rounded = step ? Math.round(next * 100) / 100 : next;
-    onChange(String(Math.max(0, rounded)));
-  };
-
+function Select({ children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <div className="relative">
-      <input
-        required
-        type="number"
-        step={step}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 pr-8 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-      />
-      <div className="absolute inset-y-0 right-2.5 flex flex-col justify-center gap-1">
-        <button
-          type="button"
-          onClick={() => bump(1)}
-          aria-label="Crește"
-          className="flex h-3 w-4 items-center justify-center bg-transparent text-white/70 transition-colors hover:text-white"
-        >
-          <svg viewBox="0 0 10 6" className="h-2.5 w-2.5 fill-none stroke-current" strokeWidth={1.5}>
-            <path d="M1 5L5 1L9 5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onClick={() => bump(-1)}
-          aria-label="Scade"
-          className="flex h-3 w-4 items-center justify-center bg-transparent text-white/70 transition-colors hover:text-white"
-        >
-          <svg viewBox="0 0 10 6" className="h-2.5 w-2.5 fill-none stroke-current" strokeWidth={1.5}>
-            <path d="M1 1L5 5L9 1" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function AddProductForm() {
-  const [form, setForm] = useState({
-    brand: "", category: "", subcategory: "", description: "", price: "", stock: "", title: "",
-  });
-  const [mainImage, setMainImage] = useState<File | null>(null);
-  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
-  const [otherImages, setOtherImages] = useState<File[]>([]);
-  const [otherImagePreviews, setOtherImagePreviews] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  const update = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm((f) => ({ ...f, [field]: e.target.value }));
-
-  const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null;
-    setMainImage(file);
-    setMainImagePreview((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return file ? URL.createObjectURL(file) : null;
-    });
-  };
-
-  const handleOtherImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    setOtherImages(files);
-    setOtherImagePreviews((prev) => {
-      prev.forEach((url) => URL.revokeObjectURL(url));
-      return files.map((f) => URL.createObjectURL(f));
-    });
-  };
-
-  const resetImages = () => {
-    if (mainImagePreview) URL.revokeObjectURL(mainImagePreview);
-    otherImagePreviews.forEach((url) => URL.revokeObjectURL(url));
-    setMainImage(null);
-    setMainImagePreview(null);
-    setOtherImages([]);
-    setOtherImagePreviews([]);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
-    if (!mainImage) {
-      setError("Adaugă cel puțin imaginea principală.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await uploadProduct({
-        ...form,
-        price: parseFloat(form.price),
-        stock: parseInt(form.stock, 10),
-        images: [mainImage, ...otherImages],
-      });
-      setSuccess(true);
-      setForm({ brand: "", category: "", subcategory: "", description: "", price: "", stock: "", title: "" });
-      resetImages();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "A apărut o eroare.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="w-full max-w-xl rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-      <h1 className="mb-6 font-display text-2xl font-semibold text-white">Adaugă un produs</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input required placeholder="Titlu" value={form.title} onChange={update("title")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
-        <div className="grid grid-cols-2 gap-3">
-          <input required placeholder="Brand" value={form.brand} onChange={update("brand")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
-          <input required placeholder="Categorie" value={form.category} onChange={update("category")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
-        </div>
-        <input required placeholder="Subcategorie" value={form.subcategory} onChange={update("subcategory")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
-        <textarea required placeholder="Descriere" value={form.description} onChange={update("description")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" rows={4} />
-        <div className="grid grid-cols-2 gap-3">
-          <NumberField placeholder="Preț (lei)" step="0.01" value={form.price} onChange={(v) => setForm((f) => ({ ...f, price: v }))} />
-          <NumberField placeholder="Stoc" value={form.stock} onChange={(v) => setForm((f) => ({ ...f, stock: v }))} />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/60">Imagine principală</label>
-            <label className="relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white/10 transition-colors hover:border-crimson/60">
-              {mainImagePreview ? (
-                <img src={mainImagePreview} alt="Previzualizare imagine principală" className="h-full w-full object-cover" />
-              ) : (
-                <span className="px-3 text-center text-xs text-white/50">Adaugă imaginea principală</span>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleMainImageChange}
-                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-              />
-            </label>
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/60">Alte imagini</label>
-            <label className="relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white/10 transition-colors hover:border-crimson/60">
-              {otherImagePreviews.length > 0 ? (
-                <div className="grid h-full w-full grid-cols-2 gap-0.5 p-0.5">
-                  {otherImagePreviews.slice(0, 4).map((src, i) => (
-                    <div key={i} className="relative overflow-hidden rounded-md bg-black/20">
-                      <img src={src} alt="" className="h-full w-full object-cover" />
-                      {i === 3 && otherImagePreviews.length > 4 && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-xs font-medium text-white">
-                          +{otherImagePreviews.length - 3}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <span className="px-3 text-center text-xs text-white/50">Adaugă restul imaginilor</span>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleOtherImagesChange}
-                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-              />
-            </label>
-          </div>
-        </div>
-
-        {error && <p className="text-sm text-red-300">{error}</p>}
-        {success && <p className="text-sm text-emerald-300">Produs adăugat cu succes.</p>}
-        <button type="submit" disabled={loading} className="mt-2 rounded-full bg-crimson px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crimson-deep disabled:opacity-50">
-          {loading ? "Se încarcă..." : "Adaugă produs"}
-        </button>
-      </form>
+      <select required {...props} className={`${inputClass} appearance-none pr-10`}>
+        {children}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
     </div>
   );
 }

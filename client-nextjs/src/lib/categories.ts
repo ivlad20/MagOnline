@@ -12,11 +12,11 @@ import {
 } from "lucide-react";
 
 export interface MainCategory {
-  /** Valoarea exactă din coloana `category` din baza de date */
+  /** Exact value of the `category` column in the database */
   value: string;
   label: string;
   icon: LucideIcon;
-  /** Valori pentru coloana `subcategory` */
+  /** Values of the `subcategory` column */
   subcategories: string[];
 }
 

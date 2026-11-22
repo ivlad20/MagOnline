@@ -27,8 +27,8 @@ export default function ProductCarousel({
     const el = scrollerRef.current;
     if (!el) return;
 
-    // Măsurăm distanța reală dintre carduri (lățime card + gap),
-    // ca să derulăm exact cu un produs, indiferent de breakpoint.
+    // Measure the real distance between cards (card width + gap)
+    // so we scroll by exactly one product at any breakpoint.
     const items = el.querySelectorAll<HTMLElement>("[data-carousel-item]");
     let amount = el.clientWidth * 0.8;
 

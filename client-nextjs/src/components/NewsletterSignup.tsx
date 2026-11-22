@@ -12,7 +12,7 @@ export default function NewsletterSignup() {
 
     setStatus("loading");
     try {
-      // TODO: leagă de endpoint-ul real, ex. POST /api/newsletter
+      // TODO: wire to a real endpoint, e.g. POST /api/newsletter
       await new Promise((resolve) => setTimeout(resolve, 600));
       setStatus("success");
       setEmail("");

@@ -7,13 +7,17 @@
    import org.springframework.stereotype.Service;
 
    import com.example.spring_boot_jdbc_app.model.User;                                                                                                                                                                                                                               
-   import com.example.spring_boot_jdbc_app.repository.UserRepository;                                                                                                                                                                                                                
+   import com.example.spring_boot_jdbc_app.repository.AdminRepository;
+import com.example.spring_boot_jdbc_app.repository.UserRepository;                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                      
    @Service                                                                                                                                                                                                                                                                          
    public class MyUserDetailsService implements UserDetailsService {                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                                                      
        @Autowired                                                                                                                                                                                                                                                                    
-       private UserRepository userRepository;                                                                                                                                                                                                                                        
+       private UserRepository userRepository;
+
+       @Autowired
+       private AdminRepository adminRepository;                                                                                                                                                                                                                                        
                                                                                                                                                                                                                                                                                      
        /**                                                                                                                                                                                                                                                                           
         * Loads user details by email.                                                                                                                                                                                                                                               
@@ -31,6 +35,7 @@
                throw new UsernameNotFoundException("User not found with email: " + email);                                                                                                                                                                                           
            }                                                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                                                                      
-           return new MyUserDetails(user);                                                                                                                                                                                                                                           
+           // Admin rights are read from the DB on every request, so revoking them takes effect immediately.
+           return new MyUserDetails(user, adminRepository.isAdmin(user.id()));                                                                                                                                                                                                                                           
        }                                                                                                                                                                                                                                                                             
    }    

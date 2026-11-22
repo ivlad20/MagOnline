@@ -55,7 +55,7 @@ export default function HeroSection() {
                 Tehnologia de care ai nevoie, la un click distanță
               </h1>
               <div className="flex items-center gap-4">
-                {/* butoanele de login/signup, neschimbate */}
+                {/* login/signup buttons, unchanged */}
               </div>
             </>
           )}
