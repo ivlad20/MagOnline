@@ -63,11 +63,21 @@ public class SecurityConfig {
                         .requestMatchers("/test/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/contact").permitAll()
 
-                        // 🔓 Permite toate GET și POST pe /products și subrutele sale
+                        // Admin panel and raw edit/delete endpoints: admins only
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")
+                        // Other users' accounts (/users/me stays open to its owner)
+                        .requestMatchers("/users/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/users", "/users/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/users/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/users/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/offers").permitAll()
+
+                        // 🔓 Public access to /products and its sub-routes
                         .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/products/**").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products/user/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products/brand/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products/subcategory/**").permitAll()

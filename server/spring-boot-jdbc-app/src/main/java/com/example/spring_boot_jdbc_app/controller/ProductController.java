@@ -64,7 +64,7 @@ public class ProductController {
         }
     }
 
-    // CREATE: seller-only, multipart — creează produsul și urcă imaginile în GCS
+    // CREATE: seller-only, multipart — creates the product and uploads its images
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadProduct(
             @RequestParam String brand,
@@ -90,7 +90,7 @@ public class ProductController {
         }
 
         Product product = new Product(null, user.id(), brand, category, subcategory, description, price, stock, title);
-        int productId = productService.saveProduct(product); // saveProduct întoarce id-ul generat
+        int productId = productService.saveProduct(product); // saveProduct returns the generated id
 
         for (int i = 0; i < images.size(); i++) {
             MultipartFile file = images.get(i);
@@ -168,7 +168,7 @@ public class ProductController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    // Listare pentru pagina de categorie (produse + imagini), opțional filtrată după subcategorie
+    // Category page listing (products + images), optionally filtered by subcategory
     @GetMapping("/category/{category}/listing")
     public ResponseEntity<List<ProductPlusImages>> getCategoryListing(
             @PathVariable String category,
@@ -241,6 +241,6 @@ public class ProductController {
             return new ResponseEntity<>("Parametrul q este obligatoriu.", HttpStatus.BAD_REQUEST);
         }
         List<ProductPlusImages> products = productService.searchProducts(q);
-        return ResponseEntity.ok(products); // 200 + listă goală dacă nu sunt rezultate
+        return ResponseEntity.ok(products); // 200 + empty list when nothing matches
     }
 }

@@ -5,10 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ProductPlusImages } from "@/types/product";
 
-const ITEM_WIDTH = 220; // px — trebuie să corespundă cu w-[220px] de mai jos
-const GAP = 16; // px — corespunde cu gap-4
+const ITEM_WIDTH = 220; // px — must match w-[220px] below
+const GAP = 16; // px — matches gap-4
 const STEP = ITEM_WIDTH + GAP;
-const SETTLE_DELAY = 150; // ms fără scroll => considerăm "așezat"
+const SETTLE_DELAY = 150; // ms without scrolling => treat as "settled"
 
 export default function HeroHistoryCarousel({ products }: { products: ProductPlusImages[] }) {
   const trackRef = useRef<HTMLDivElement>(null);

@@ -30,6 +30,8 @@ export interface ProductCardInterface extends Pick<Product, "id" | "brand" | "ca
 
 export interface ProductShowcaseProps {
   product: {
+    id: number;
+    category: string;
     title: string;
     brand: string;
     subcategory: string;
@@ -41,4 +43,15 @@ export interface ProductShowcaseProps {
     rating?: number;
     reviewCount?: number;
   };
+}
+/** Body of POST /products/upload (sent as multipart form data; the first image is the main one). */
+export interface NewProductPayload {
+  title: string;
+  brand: string;
+  category: string;
+  subcategory: string;
+  description: string;
+  price: number;
+  stock: number;
+  images: File[];
 }

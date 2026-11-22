@@ -36,7 +36,7 @@ export default async function CategoryPage({
 }) {
   const { slug } = await params;
   const { subcategory } = await searchParams;
-  const category = decodeURIComponent(slug); // Next.js lasă slug-ul codat (ex. "Componente%20PC")
+  const category = decodeURIComponent(slug); // Next.js keeps the slug URL-encoded (e.g. "Componente%20PC")
 
   const [products, subcategories] = await Promise.all([
     fetchCategoryProducts(category, subcategory),

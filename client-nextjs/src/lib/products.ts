@@ -26,7 +26,7 @@ export async function uploadProduct(
 
   const res = await fetch(`${API_URL}/products/upload`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` }, // nu seta Content-Type manual — browserul pune boundary-ul corect
+    headers: { Authorization: `Bearer ${token}` }, // don't set Content-Type manually — the browser adds the multipart boundary
     body: formData,
   });
 
@@ -43,6 +43,12 @@ export function getRandomProducts(count: number) {
   return apiFetch<ProductCardInterface[]>(`/products/random/${count}`).then(
     (data) => data ?? [],
   );
+}
+
+/** "Ofertele săptămânii" chosen in the admin panel; falls back to random products when none are set. */
+export async function getWeeklyOffers(count = 8) {
+  const offers = await apiFetch<ProductCardInterface[]>("/offers", 30);
+  return offers && offers.length > 0 ? offers.slice(0, count) : getRandomProducts(count);
 }
 
 export function getProductById(id: number | string) {

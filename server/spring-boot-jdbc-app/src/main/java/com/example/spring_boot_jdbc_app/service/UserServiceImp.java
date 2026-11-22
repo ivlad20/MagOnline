@@ -84,7 +84,8 @@ public class UserServiceImp implements UserService {
         if (user == null || !passwordEncoder.matches(password, user.password())) {
             throw new BadCredentialsException("Invalid email or password");
         }
-        return new MyUserDetails(user);
+        // Only used to issue the token; roles (admin) are loaded per request by JwtFilter.
+        return new MyUserDetails(user, false);
     }
 
 

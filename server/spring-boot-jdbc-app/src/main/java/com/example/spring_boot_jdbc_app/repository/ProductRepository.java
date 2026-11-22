@@ -145,7 +145,7 @@ public class ProductRepository {
     }
 
     public ProductDetail getProductByIdPlusImages(int id) {
-        Product product = getProductById(id); // productRowMapper complet, deja există
+        Product product = getProductById(id); // full productRowMapper, already defined
 
         String imageSql = "SELECT image_url, is_main FROM product_images WHERE product_id = ?";
         List<ImageData> imgs = jdbcTemplate.query(imageSql,
@@ -269,6 +269,19 @@ public class ProductRepository {
             List<String> additionalImages = imgs.stream().filter(i -> !i.isMain()).map(ImageData::url).toList();
             return new ProductPlusImages(p.id(), p.brand(), p.category(), p.title(), p.price(), mainImage, additionalImages);
         }).toList();
+    }
+
+    /** Products with images, in the same order as the given ids (missing ids are skipped). */
+    public List<ProductPlusImages> getProductsPlusImagesByIds(List<Integer> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        String sql = "SELECT * FROM products WHERE id IN (%s)".formatted(
+                ids.stream().map(String::valueOf).collect(Collectors.joining(",")));
+        Map<Integer, Product> byId = new HashMap<>();
+        jdbcTemplate.query(sql, productPartialRowMapper).forEach(p -> byId.put(p.id(), p));
+        List<Product> ordered = ids.stream().map(byId::get).filter(java.util.Objects::nonNull).toList();
+        return attachImages(ordered);
     }
 
     public List<ProductPlusImages> getProductsByCategoryPlusImages(String category) {

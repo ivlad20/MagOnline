@@ -16,7 +16,7 @@ const COLUMNS = [
     heading: "Contul meu",
     links: [
       { label: "Intră în cont", href: "/login" },
-      { label: "Comenzile mele", href: "/orders" },
+      { label: "Comenzile mele", href: "/comenzi" },
       { label: "Favorite", href: "/favorite" },
       { label: "Coșul meu", href: "/cos" },
     ],
@@ -27,16 +27,16 @@ const COLUMNS = [
       { label: "Livrare & retur", href: "/livrare" },
       { label: "Modalități de plată", href: "/livrare#plata" },
       { label: "Garanție & service", href: "/livrare#garantie" },
-      { label: "Contact", href: "/despre#contact" },
+      { label: "Contact", href: "/contact" },
     ],
   },
   {
     heading: "MagOnline",
     links: [
       { label: "Despre noi", href: "/despre" },
-      { label: "Devino vânzător", href: "/sell_product" },
-      { label: "Termeni și condiții", href: "/despre#termeni" },
-      { label: "Confidențialitate", href: "/despre#confidentialitate" },
+      { label: "Devino vânzător", href: "/devino-vanzator" },
+      { label: "Termeni și condiții", href: "/termeni" },
+      { label: "Confidențialitate", href: "/termeni#confidentialitate" },
     ],
   },
 ];
@@ -53,7 +53,7 @@ const PAYMENTS = ["VISA", "Mastercard", "Apple Pay", "Google Pay", "Ramburs"];
 export default function Footer() {
   return (
     <footer className="mt-auto">
-      {/* Beneficii */}
+      {/* Benefits */}
       <section className="border-t border-mist bg-white">
         <div className="mx-auto grid max-w-[1400px] grid-cols-2 gap-6 px-4 py-8 sm:px-8 lg:grid-cols-4">
           {BENEFITS.map(({ icon: Icon, title, copy }) => (
@@ -112,7 +112,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Categorii */}
+          {/* Categories */}
           <div>
             <p className="font-display text-sm font-semibold uppercase tracking-wider text-seal-light">Categorii</p>
             <ul className="mt-4 flex flex-col gap-2.5">

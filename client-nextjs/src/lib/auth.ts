@@ -38,7 +38,7 @@ export async function login(payload: LoginPayload): Promise<string> {
   });
 
   if (!res.ok) {
-    // backend-ul întoarce un string simplu pe 401, nu JSON
+    // the backend returns a plain string on 401, not JSON
     const message = await res.text();
     throw new Error(message || "Email sau parolă incorecte.");
   }

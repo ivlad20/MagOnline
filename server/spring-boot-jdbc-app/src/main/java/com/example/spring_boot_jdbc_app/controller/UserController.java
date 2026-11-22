@@ -17,9 +17,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.security.core.Authentication;
+
+import com.example.spring_boot_jdbc_app.model.Address;
 import com.example.spring_boot_jdbc_app.model.JWTResponse;
 import com.example.spring_boot_jdbc_app.model.LoginRequest;
+import com.example.spring_boot_jdbc_app.model.ProfileUpdate;
 import com.example.spring_boot_jdbc_app.model.User;
+import com.example.spring_boot_jdbc_app.model.UserProfile;
 import com.example.spring_boot_jdbc_app.repository.UserRepository;
 import com.example.spring_boot_jdbc_app.security.JwtUtil;
 import com.example.spring_boot_jdbc_app.security.MyUserDetails;
@@ -58,6 +63,37 @@ public class UserController {
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userRepository.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    // READ: profile of the logged-in user (no password hash)
+    @GetMapping("/me")
+    public ResponseEntity<UserProfile> getMyProfile(Authentication authentication) {
+        MyUserDetails me = (MyUserDetails) authentication.getPrincipal();
+        User user = userRepository.getUserById(me.getUser().id());
+        return user == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(UserProfile.from(user, me.isAdmin()));
+    }
+
+    // UPDATE: name, surname, phone and delivery address of the logged-in user
+    @PutMapping("/me")
+    public ResponseEntity<?> updateMyProfile(@RequestBody ProfileUpdate update, Authentication authentication) {
+        MyUserDetails me = (MyUserDetails) authentication.getPrincipal();
+        Integer id = me.getUser().id();
+        if (update.name() == null || update.name().isBlank() || update.surname() == null || update.surname().isBlank()) {
+            return ResponseEntity.badRequest().body("Prenumele și numele sunt obligatorii.");
+        }
+        if (update.phone() != null && update.phone().length() > 15) {
+            return ResponseEntity.badRequest().body("Numărul de telefon este prea lung.");
+        }
+        Address a = update.address();
+        if (a != null && (isBlank(a.street()) || isBlank(a.city()) || isBlank(a.zipcode()))) {
+            return ResponseEntity.badRequest().body("Pentru adresă completează strada, orașul și codul poștal.");
+        }
+        userRepository.updateProfile(id, update);
+        return ResponseEntity.ok(UserProfile.from(userRepository.getUserById(id), me.isAdmin()));
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.isBlank();
     }
 
     // READ: Get a user by ID
@@ -105,13 +141,13 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         System.out.println(request.email() + " " + request.password());
         try {
-            // 1. Autentifică utilizatorul
+            // 1. Authenticate the user
             MyUserDetails userDetails = (MyUserDetails) userService.authenticate(request.email(), request.password());
 
-            // 2. Generează token JWT
+            // 2. Generate the JWT
             String token = jwtUtil.generateToken(userDetails.getEmail(), userDetails.getUsername());
 
-            // 3. Returnează tokenul
+            // 3. Return the token
             return ResponseEntity.ok(new JWTResponse(token));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username sau parolă incorecte.");

@@ -16,7 +16,7 @@ export default function StarRating({
           const fill = Math.min(1, Math.max(0, rating - i));
           return (
             <span key={i} className="relative inline-block">
-              <svg viewBox="0 0 20 20" className={`${starSize} fill-white/15`}>
+              <svg viewBox="0 0 20 20" className={`${starSize} fill-mist`}>
                 <path d="M10 1.5l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L1.3 7.8l6.1-.7L10 1.5z" />
               </svg>
               {fill > 0 && (
@@ -32,7 +32,7 @@ export default function StarRating({
           );
         })}
       </div>
-      <span className="text-xs text-white/60">
+      <span className="text-xs text-ink-soft">
         {rating.toFixed(1)}
         {typeof reviewCount === "number" && ` (${reviewCount})`}
       </span>

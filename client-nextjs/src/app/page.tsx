@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Cpu, Gamepad2, ChevronRight } from "lucide-react";
-import { getRandomProducts } from "@/lib/products";
+import { getRandomProducts, getWeeklyOffers } from "@/lib/products";
 import ProductCarousel from "@/components/ProductCarousel";
 import CategoryShowcase from "@/components/CategoryShowcase";
 import RecentlyViewed from "@/components/RecentlyViewed";
@@ -26,7 +26,7 @@ const PROMO_TILES = [
 
 export default async function Home() {
   const [weeklyDeals, recommended, moreProducts] = await Promise.all([
-    getRandomProducts(12),
+    getWeeklyOffers(8),
     getRandomProducts(12),
     getRandomProducts(12),
   ]);

@@ -1,0 +1,6 @@
+# Local AI-assistant files: keep them out of the repository.
+graphify-out/
+CLAUDE.md
+AGENTS.md
+.claude/
+.graphifyignore

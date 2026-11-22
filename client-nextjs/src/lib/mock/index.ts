@@ -1,10 +1,10 @@
 /**
- * Date mock locale, folosite cât backend-ul nu rulează.
- * Activare: NEXT_PUBLIC_USE_MOCK=true în .env.local.
+ * Local mock data, used while the backend is not running.
+ * Enable with NEXT_PUBLIC_USE_MOCK=true in .env.local.
  *
- * Produsele cu id < 100 sunt cele reale din baza de date (pozele lor sunt salvate
- * în public/mock/products). Cele cu id >= 100 sunt inventate, ca să nu fie goale
- * categoriile Laptopuri / Telefoane / Tablete / Console.
+ * Products with id < 100 are the real ones from the database (their images live
+ * in public/mock/products). Products with id >= 100 are made up so the
+ * Laptops / Phones / Tablets / Consoles categories are not empty.
  */
 import type { ProductPlusImages } from "@/types/product";
 import data from "./products.json";
@@ -30,7 +30,7 @@ function byCategory(category: string) {
   return PRODUCTS.filter((p) => normalize(p.category) === c);
 }
 
-/** Răspunde ca backend-ul la un GET; întoarce `null` pentru rute necunoscute/negăsite. */
+/** Answers a GET like the backend would; returns `null` for unknown routes or missing items. */
 export function mockGet<T>(path: string): T | null {
   const url = new URL(path, "http://mock");
   const parts = url.pathname.split("/").filter(Boolean).map(decodeURIComponent);

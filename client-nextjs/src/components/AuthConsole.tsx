@@ -41,20 +41,28 @@ const handleSubmit = async (e: React.FormEvent) => {
       const token = await apiLogin({ email: form.email, password: form.password });
       setAuthUser(token);
     }
-    router.push("/");
+    // Return to the page that sent the user here (?next=/cont), only for same-site paths.
+    const next = new URLSearchParams(window.location.search).get("next");
+    router.push(next && next.startsWith("/") && !next.startsWith("//") ? next : "/");
   } catch (err) {
-    setError(err instanceof Error ? err.message : "A apărut o eroare.");
+    setError(
+      err instanceof TypeError
+        ? "Nu ne putem conecta la server. Verifică dacă backend-ul rulează și reîncarcă pagina."
+        : err instanceof Error
+          ? err.message
+          : "A apărut o eroare.",
+    );
   } finally {
     setLoading(false);
   }
 };
 
   return (
-    <div className="w-full max-w-sm rounded-3xl border border-white/15 bg-white/10 p-8 text-white shadow-2xl backdrop-blur-xl">
-      <p className="mb-1 font-mono text-xs uppercase tracking-widest text-crimson">
-        {mode === "login" ? "> autentificare" : "> cont nou"}
+    <div className="w-full max-w-md rounded-2xl border border-mist bg-white p-8 text-ink shadow-[0_8px_30px_rgba(15,32,66,0.08)] sm:p-10">
+      <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-crimson">
+        {mode === "login" ? "Autentificare" : "Cont nou"}
       </p>
-      <h2 className="mb-6 font-display text-2xl font-semibold">
+      <h2 className="mb-6 font-display text-2xl font-semibold text-navy">
         {mode === "login" ? "Bine ai revenit" : "Creează-ți contul"}
       </h2>
 
@@ -67,14 +75,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                 placeholder="Prenume"
                 value={form.name}
                 onChange={update("name")}
-                className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-crimson"
+                className="rounded-lg border border-mist bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-soft/60 outline-none transition-colors focus:border-crimson focus:ring-2 focus:ring-crimson/15"
               />
               <input
                 required
                 placeholder="Nume"
                 value={form.surname}
                 onChange={update("surname")}
-                className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-crimson"
+                className="rounded-lg border border-mist bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-soft/60 outline-none transition-colors focus:border-crimson focus:ring-2 focus:ring-crimson/15"
               />
             </div>
             <input
@@ -82,7 +90,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               placeholder="Nume utilizator"
               value={form.username}
               onChange={update("username")}
-              className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-crimson"
+              className="rounded-lg border border-mist bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-soft/60 outline-none transition-colors focus:border-crimson focus:ring-2 focus:ring-crimson/15"
             />
             <input
               required
@@ -90,7 +98,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               placeholder="Telefon"
               value={form.phone}
               onChange={update("phone")}
-              className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-crimson"
+              className="rounded-lg border border-mist bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-soft/60 outline-none transition-colors focus:border-crimson focus:ring-2 focus:ring-crimson/15"
             />
           </>
         )}
@@ -101,7 +109,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           placeholder="Email"
           value={form.email}
           onChange={update("email")}
-          className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-crimson"
+          className="rounded-lg border border-mist bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-soft/60 outline-none transition-colors focus:border-crimson focus:ring-2 focus:ring-crimson/15"
         />
         <input
           required
@@ -109,15 +117,15 @@ const handleSubmit = async (e: React.FormEvent) => {
           placeholder="Parolă"
           value={form.password}
           onChange={update("password")}
-          className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-crimson"
+          className="rounded-lg border border-mist bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-soft/60 outline-none transition-colors focus:border-crimson focus:ring-2 focus:ring-crimson/15"
         />
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="rounded-lg bg-crimson-soft px-3 py-2 text-sm text-crimson-deep">{error}</p>}
 
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 rounded-full bg-crimson px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crimson-deep disabled:opacity-50"
+          className="mt-2 rounded-lg bg-crimson px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-crimson-deep disabled:opacity-50"
         >
           {loading ? "Se procesează..." : mode === "login" ? "Autentificare" : "Creează cont"}
         </button>
@@ -129,7 +137,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           setError(null);
           setMode(mode === "login" ? "signup" : "login");
         }}
-        className="mt-5 w-full text-center text-xs text-white/60 hover:text-white"
+        className="mt-6 w-full text-center text-sm text-ink-soft hover:text-crimson"
       >
         {mode === "login" ? "Nu ai cont? Creează unul" : "Ai deja cont? Autentifică-te"}
       </button>

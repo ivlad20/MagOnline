@@ -9,7 +9,7 @@ import type { Product } from "./ProductCard";
 
 const INTERVAL_MS = 5500;
 
-/** Carusel cu un singur produs vizibil; produsele se schimbă prin fade. */
+/** Carousel showing one product at a time, cross-fading between them. */
 export default function OffersSpotlight({ products }: { products: Product[] }) {
   const items = products.slice(0, 8);
   const n = items.length;

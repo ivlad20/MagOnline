@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import com.example.spring_boot_jdbc_app.model.Address;
+import com.example.spring_boot_jdbc_app.model.ProfileUpdate;
 import com.example.spring_boot_jdbc_app.model.User;
 
 @Repository
@@ -31,7 +32,7 @@ public class UserRepository {
     private RowMapper<User> userRowMapper = (rs, rowNum) -> {
         Address address = null;
 
-        // verificăm dacă cel puțin un câmp nu e null
+        // check whether at least one field is non-null
         if (rs.getString("street") != null || rs.getString("city") != null || rs.getString("zipcode") != null ||
                 rs.getString("apartment") != null || rs.getString("floor") != null) {
             address = new Address(
@@ -57,7 +58,7 @@ public class UserRepository {
 
     // CREATE: Add a new user and their address
     public int saveUser(User user) {
-        // Inserare în tabela users
+        // Insert into users
         String userSql = "INSERT INTO users (name, surname, username, email, phone, password) VALUES (?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -74,12 +75,12 @@ public class UserRepository {
 
         int userId = keyHolder.getKey().intValue();
 
-        // Dacă adresa e null, nu o inserezi
+        // If the address is null, skip inserting it
         if (user.address() == null) {
-            return 1; // succes inserare doar user
+            return 1; // success, user only
         }
 
-        // Inserare în tabela addresses
+        // Insert into addresses
         String addressSql = "INSERT INTO addresses (street, city, zipcode, apartment, floor, user_id) VALUES (?, ?, ?, ?, ?, ?)";
         return jdbcTemplate.update(
                 addressSql,
@@ -175,6 +176,34 @@ public class UserRepository {
                     user.id()
             );
         }
+    }
+
+    // UPDATE: profile fields only (name, surname, phone) plus the single delivery address
+    public void updateProfile(Integer userId, ProfileUpdate update) {
+        jdbcTemplate.update("UPDATE users SET name = ?, surname = ?, phone = ? WHERE id = ?",
+                update.name().trim(), update.surname().trim(), blankToNull(update.phone()), userId);
+
+        if (update.address() == null) {
+            jdbcTemplate.update("DELETE FROM addresses WHERE user_id = ?", userId);
+            return;
+        }
+        upsertAddress(userId, update.address());
+    }
+
+    // UPSERT: the user's single delivery address (also used by checkout's "save address")
+    public void upsertAddress(Integer userId, Address a) {
+        int updated = jdbcTemplate.update(
+                "UPDATE addresses SET street = ?, city = ?, zipcode = ?, apartment = ?, floor = ? WHERE user_id = ?",
+                a.street().trim(), a.city().trim(), a.zipcode().trim(), blankToNull(a.apartment()), blankToNull(a.floor()), userId);
+        if (updated == 0) {
+            jdbcTemplate.update(
+                    "INSERT INTO addresses (street, city, zipcode, apartment, floor, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+                    a.street().trim(), a.city().trim(), a.zipcode().trim(), blankToNull(a.apartment()), blankToNull(a.floor()), userId);
+        }
+    }
+
+    private static String blankToNull(String s) {
+        return s == null || s.isBlank() ? null : s.trim();
     }
 
     // DELETE: Delete a user and their associated address (cascade delete is handled by the database)

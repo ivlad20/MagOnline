@@ -1,15 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { Check, Heart, Minus, Plus, ShieldCheck, ShoppingCart, Truck, RotateCcw } from "lucide-react";
 import StockBadge from "@/components/StockBadge";
+import { MAX_CART_QTY, shop, useIsFavorite } from "@/lib/shopStore";
 
-interface Product {
+interface BuyBoxProduct {
+  id: number;
+  title: string;
+  brand: string;
+  category: string;
   price: number;
   stock: number;
+  mainImage: string | null;
 }
 
 const priceFormatter = new Intl.NumberFormat("ro-RO", {
-  minimumFractionDigits: 0,
+  minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
 
@@ -21,149 +29,167 @@ const WARRANTY_OPTIONS = [
 
 const INSTALLMENT_OPTIONS = [3, 6, 12, 24];
 
-function getApproxLocationLabel(): string {
-  try {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const city = tz.split("/").pop()?.replace(/_/g, " ") ?? "";
-    const region = navigator.language.split("-")[1];
-    const country = region
-      ? new Intl.DisplayNames(["ro"], { type: "region" }).of(region)
-      : undefined;
-    return [city, country].filter(Boolean).join(", ") || "România";
-  } catch {
-    return "România";
-  }
-}
-
 function getDeliveryEstimate(): string {
-  const now = new Date();
-  const start = new Date(now);
-  start.setDate(start.getDate() + 1);
-  const end = new Date(now);
-  end.setDate(end.getDate() + 3);
-  const fmt = (d: Date) =>
-    d.toLocaleDateString("ro-RO", { day: "numeric", month: "long" });
-  return `${fmt(start)} – ${fmt(end)}`;
+  const fmt = (offset: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + offset);
+    return d.toLocaleDateString("ro-RO", { day: "numeric", month: "long" });
+  };
+  return `${fmt(1)} – ${fmt(3)}`;
 }
 
-export default function ProductBuyBox({ product }: { product: Product }) {
+export default function ProductBuyBox({ product }: { product: BuyBoxProduct }) {
   const [warrantyId, setWarrantyId] = useState("none");
   const [installments, setInstallments] = useState(12);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [location, setLocation] = useState("România");
-
-  useEffect(() => {
-    setLocation(getApproxLocationLabel());
-  }, []);
+  const [quantity, setQuantity] = useState(1);
+  const [justAdded, setJustAdded] = useState(false);
+  const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isFavorite = useIsFavorite(product.id);
 
   const warranty = WARRANTY_OPTIONS.find((w) => w.id === warrantyId)!;
-  const totalPrice = product.price + warranty.price;
-  const monthlyRate = useMemo(
-    () => totalPrice / installments,
-    [totalPrice, installments],
-  );
+  const unitPrice = product.price + warranty.price;
+  const monthlyRate = unitPrice / installments;
   const deliveryWindow = useMemo(() => getDeliveryEstimate(), []);
+  const outOfStock = product.stock <= 0;
+  const maxQty = Math.max(1, Math.min(MAX_CART_QTY, product.stock));
+
+  const shopProduct = {
+    id: product.id,
+    title: product.title,
+    price: unitPrice,
+    mainImage: product.mainImage,
+    brand: product.brand,
+    category: product.category,
+  };
+
+  const addToCart = () => {
+    shop.addToCart(shopProduct, quantity);
+    setJustAdded(true);
+    if (addedTimer.current) clearTimeout(addedTimer.current);
+    addedTimer.current = setTimeout(() => setJustAdded(false), 2500);
+  };
 
   return (
-    <div className="flex flex-col gap-4">
-      <StockBadge stock={product.stock} />
+    <div className="flex flex-col gap-5">
+      <div className="rounded-2xl border border-mist bg-paper p-5">
+        <StockBadge stock={product.stock} />
 
-      <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3.5">
-        <div className="flex items-baseline gap-1.5 font-price font-bold text-white">
-          <span className="text-2xl">{priceFormatter.format(totalPrice)}</span>
-          <span className="text-sm font-body font-normal text-white/70">
-            Lei
+        <p className="mt-3 flex items-baseline gap-1.5 font-price font-bold text-navy">
+          <span className="text-3xl">{priceFormatter.format(unitPrice)}</span>
+          <span className="font-body text-base font-medium text-ink-soft">lei</span>
+        </p>
+
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-ink-soft">
+          <span>sau</span>
+          <select
+            value={installments}
+            onChange={(e) => setInstallments(Number(e.target.value))}
+            aria-label="Număr de rate"
+            className="rounded-md border border-mist bg-white px-2 py-1 text-sm text-ink focus:border-crimson focus:outline-none"
+          >
+            {INSTALLMENT_OPTIONS.map((n) => (
+              <option key={n} value={n}>
+                {n} rate
+              </option>
+            ))}
+          </select>
+          <span>
+            de <strong className="text-ink">{priceFormatter.format(monthlyRate)} lei</strong>/lună
           </span>
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-sm text-white/60">
-          <span>sau</span>
-          <div className="relative">
-            <select
-              value={installments}
-              onChange={(e) => setInstallments(Number(e.target.value))}
-              className="appearance-none rounded-md border border-white/15 bg-white/10 py-1 pl-2 pr-6 text-sm text-white focus:border-voltaic focus:outline-none"
-            >
-              {INSTALLMENT_OPTIONS.map((n) => (
-                <option key={n} value={n}>
-                  {n} rate
-                </option>
-              ))}
-            </select>
-            <svg
-              viewBox="0 0 10 6"
-              className="pointer-events-none absolute right-1.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 fill-none stroke-white/70"
-              strokeWidth={1.5}
-            >
-              <path
-                d="M1 1L5 5L9 1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <span>de {monthlyRate.toFixed(2)} lei/lună</span>
-        </div>
-      </div>
 
-      <div className="flex flex-wrap gap-3">
-        <button
-          disabled
-          title="Coșul urmează într-un pas viitor"
-          className="flex cursor-not-allowed items-center gap-2 rounded-full border border-ember/40 bg-ember/10 px-6 py-3 text-sm font-semibold text-ember opacity-50 transition-colors"
-        >
-          Adaugă în coș
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setIsFavorite((f) => !f)}
-          aria-pressed={isFavorite}
-          className={`flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-medium transition-colors ${
-            isFavorite
-              ? "border-ember bg-ember/10 text-ember"
-              : "border-white/15 bg-white/5 text-white/80 hover:border-white/30"
-          }`}
-        >
-          <svg
-            viewBox="0 0 20 18"
-            className="h-4 w-4"
-            fill={isFavorite ? "currentColor" : "none"}
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              d="M10 17S1 11.5 1 5.8C1 2.6 3.4 1 5.9 1c1.6 0 3.1.9 4.1 2.4C11 1.9 12.5 1 14.1 1 16.6 1 19 2.6 19 5.8 19 11.5 10 17 10 17z"
-              strokeLinejoin="round"
-            />
-          </svg>
-          {isFavorite ? "La favorite" : "Adaugă la favorite"}
-        </button>
-      </div>
-
-      <div className="flex flex-col gap-2 border-t border-white/10 pt-4">
-        <label className="text-xs font-medium text-white/60">
+        <label className="mt-5 block text-xs font-semibold uppercase tracking-wider text-ink-soft" htmlFor="warranty">
           Garanție extinsă
         </label>
         <select
+          id="warranty"
           value={warrantyId}
           onChange={(e) => setWarrantyId(e.target.value)}
-          className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white focus:border-voltaic focus:outline-none"
+          className="mt-1.5 w-full rounded-lg border border-mist bg-white px-3 py-2.5 text-sm text-ink focus:border-crimson focus:outline-none"
         >
           {WARRANTY_OPTIONS.map((w) => (
             <option key={w.id} value={w.id}>
               {w.label}
-              {w.price > 0 ? ` — ${w.price} lei` : ""}
+              {w.price > 0 ? ` (+${w.price} lei)` : ""}
             </option>
           ))}
         </select>
+
+        <div className="mt-5 flex gap-3">
+          <div className="flex items-center rounded-lg border border-mist bg-white">
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              disabled={quantity <= 1 || outOfStock}
+              aria-label="Scade cantitatea"
+              className="flex h-12 w-10 items-center justify-center text-ink-soft hover:text-navy disabled:opacity-40"
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+            <span className="w-8 text-center text-sm font-semibold text-navy" aria-live="polite">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
+              disabled={quantity >= maxQty || outOfStock}
+              aria-label="Crește cantitatea"
+              className="flex h-12 w-10 items-center justify-center text-ink-soft hover:text-navy disabled:opacity-40"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={addToCart}
+            disabled={outOfStock}
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-crimson px-6 text-sm font-semibold text-white transition-colors hover:bg-crimson-deep disabled:cursor-not-allowed disabled:bg-mist disabled:text-ink-soft"
+          >
+            {justAdded ? <Check className="h-5 w-5" /> : <ShoppingCart className="h-5 w-5" />}
+            {outOfStock ? "Stoc epuizat" : justAdded ? "Adăugat în coș" : "Adaugă în coș"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => shop.toggleFavorite(shopProduct)}
+            aria-pressed={isFavorite}
+            aria-label={isFavorite ? "Elimină de la favorite" : "Adaugă la favorite"}
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border transition-colors ${
+              isFavorite
+                ? "border-crimson bg-crimson-soft text-crimson"
+                : "border-mist bg-white text-ink-soft hover:border-crimson hover:text-crimson"
+            }`}
+          >
+            <Heart className="h-5 w-5" fill={isFavorite ? "currentColor" : "none"} />
+          </button>
+        </div>
+
+        {justAdded && (
+          <Link href="/cos" className="mt-3 inline-block text-sm font-semibold text-crimson hover:underline">
+            Vezi coșul →
+          </Link>
+        )}
       </div>
 
-      <div className="flex flex-col gap-1 border-t border-white/10 pt-4 text-sm text-white/70">
-        <p className="font-medium text-white">Livrare estimată în {location}</p>
-        <p>
-          {deliveryWindow} (estimare bazată pe fusul orar al dispozitivului tău)
-        </p>
-      </div>
+      <ul className="flex flex-col gap-3 text-sm text-ink-soft">
+        <li className="flex items-start gap-3">
+          <Truck className="mt-0.5 h-5 w-5 shrink-0 text-seal" />
+          <span>
+            <strong className="text-ink">Livrare estimată {deliveryWindow}</strong>
+            <br />
+            Gratuită pentru comenzi de peste 250 lei
+          </span>
+        </li>
+        <li className="flex items-start gap-3">
+          <RotateCcw className="mt-0.5 h-5 w-5 shrink-0 text-seal" />
+          <span>Retur gratuit în 30 de zile</span>
+        </li>
+        <li className="flex items-start gap-3">
+          <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-seal" />
+          <span>Garanție 24 de luni · plată securizată cu card, transfer sau ramburs</span>
+        </li>
+      </ul>
     </div>
   );
 }
