@@ -15,11 +15,16 @@ export async function getMySellerStatus(): Promise<SellerStatus> {
   return res.json();
 }
 
-export async function registerAsSeller(payload: SellerRegistration): Promise<void> {
+export async function registerAsSeller(
+  payload: SellerRegistration,
+): Promise<void> {
   const token = getToken();
   const res = await fetch(`${API_URL}/sellers/register`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify(payload),
   });
 

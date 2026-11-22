@@ -1,24 +1,37 @@
 @import "tailwindcss";
 
 @theme {
-  /* Palette */
-  --color-paper: #FAFAF8;
-  --color-paper-dim: #F0F0EC;
-  --color-ink: #14171F;
-  --color-ink-soft: #4B5163;
+  /* Palette — navy blue / seal blue / crimson pink */
+  --color-navy: #0F2042;
+  --color-navy-deep: #091530;
+  --color-navy-light: #1C3466;
 
-  --color-voltaic: #1B3A6B;
-  --color-voltaic-deep: #10233F;
-  --color-voltaic-light: #2E5590;
+  --color-seal: #4A6A8C;
+  --color-seal-light: #7F9BB8;
+  --color-seal-soft: #E8EEF5;
 
-  --color-ember: #FF5A1F;
-  --color-ember-deep: #D6440F;
-  --color-ember-soft: #FFE4D6;
+  --color-crimson: #DC1F5A;
+  --color-crimson-deep: #B3124A;
+  --color-crimson-soft: #FDE7EE;
+
+  --color-paper: #FAFBFD;
+  --color-paper-dim: #F1F4F8;
+  --color-ink: #121A2B;
+  --color-ink-soft: #4E5B70;
+
+  /* Aliasuri vechi, ca restul componentelor să preia paleta nouă */
+  --color-voltaic: #0F2042;
+  --color-voltaic-deep: #091530;
+  --color-voltaic-light: #4A6A8C;
+
+  --color-ember: #DC1F5A;
+  --color-ember-deep: #B3124A;
+  --color-ember-soft: #FDE7EE;
 
   --color-signal: #1F9D55;
   --color-signal-soft: #E1F5E9;
 
-  --color-mist: #E4E7EE;
+  --color-mist: #DDE4EE;
 
   /* Type */
   --font-display: var(--font-display);

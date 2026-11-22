@@ -5,9 +5,6 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { registerAsSeller } from "@/lib/sellers";
 import { uploadProduct } from "@/lib/products";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import MoltenMetalBG from "@/components/MoltenMetalBG";
 
 export default function SellerPage() {
   const { user, isSeller, isLoading, refreshSellerStatus } = useAuth();
@@ -20,31 +17,12 @@ export default function SellerPage() {
   }
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-[#111111]">
-      <MoltenMetalBG
-        color1="#2749ff"
-        color2="#dfc7de"
-        color3="#FFFFFF"
-        speed={0.35}
-        scale={5}
-        detail={3}
-        glow={2}
-        coreSize={0.2}
-        blackPoint={0}
-        grainIntensity={0}
-        brightness={1.2}
-        mouseInteraction
-        className="fixed inset-0 h-screen w-screen"
-      />
-
-      <div className="relative z-10 flex min-h-screen flex-col">
-        <Navbar />
+    <div className="relative w-full overflow-hidden bg-gradient-to-br from-navy-deep via-navy to-seal">
+      <div className="relative z-10 flex min-h-[calc(100vh-100px)] flex-col">
 
         <main className="flex flex-1 items-center justify-center px-4 py-16">
           {isSeller ? <AddProductForm /> : <BecomeSellerForm onSuccess={refreshSellerStatus} />}
         </main>
-
-        <Footer />
       </div>
     </div>
   );
@@ -76,13 +54,13 @@ function BecomeSellerForm({ onSuccess }: { onSuccess: () => Promise<void> }) {
     <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
       <h1 className="mb-6 font-display text-2xl font-semibold text-white">Devino seller</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input required placeholder="Nume firmă" value={form.companyName} onChange={update("companyName")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-voltaic focus:outline-none" />
-        <input required placeholder="CUI" value={form.cui} onChange={update("cui")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-voltaic focus:outline-none" />
-        <input required placeholder="Adresă" value={form.address} onChange={update("address")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-voltaic focus:outline-none" />
-        <input required placeholder="Telefon" value={form.phone} onChange={update("phone")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-voltaic focus:outline-none" />
-        <input required placeholder="IBAN" value={form.iban} onChange={update("iban")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-voltaic focus:outline-none" />
+        <input required placeholder="Nume firmă" value={form.companyName} onChange={update("companyName")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
+        <input required placeholder="CUI" value={form.cui} onChange={update("cui")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
+        <input required placeholder="Adresă" value={form.address} onChange={update("address")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
+        <input required placeholder="Telefon" value={form.phone} onChange={update("phone")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
+        <input required placeholder="IBAN" value={form.iban} onChange={update("iban")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
         {error && <p className="text-sm text-red-300">{error}</p>}
-        <button type="submit" disabled={loading} className="mt-2 rounded-full bg-voltaic px-6 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-voltaic/90 disabled:opacity-50">
+        <button type="submit" disabled={loading} className="mt-2 rounded-full bg-crimson px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crimson-deep disabled:opacity-50">
           {loading ? "Se procesează..." : "Trimite"}
         </button>
       </form>
@@ -119,7 +97,7 @@ function NumberField({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 pr-8 text-sm text-white placeholder:text-white/50 focus:border-voltaic focus:outline-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        className="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 pr-8 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
       />
       <div className="absolute inset-y-0 right-2.5 flex flex-col justify-center gap-1">
         <button
@@ -220,13 +198,13 @@ function AddProductForm() {
     <div className="w-full max-w-xl rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
       <h1 className="mb-6 font-display text-2xl font-semibold text-white">Adaugă un produs</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input required placeholder="Titlu" value={form.title} onChange={update("title")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-voltaic focus:outline-none" />
+        <input required placeholder="Titlu" value={form.title} onChange={update("title")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
         <div className="grid grid-cols-2 gap-3">
-          <input required placeholder="Brand" value={form.brand} onChange={update("brand")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-voltaic focus:outline-none" />
-          <input required placeholder="Categorie" value={form.category} onChange={update("category")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-voltaic focus:outline-none" />
+          <input required placeholder="Brand" value={form.brand} onChange={update("brand")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
+          <input required placeholder="Categorie" value={form.category} onChange={update("category")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
         </div>
-        <input required placeholder="Subcategorie" value={form.subcategory} onChange={update("subcategory")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-voltaic focus:outline-none" />
-        <textarea required placeholder="Descriere" value={form.description} onChange={update("description")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-voltaic focus:outline-none" rows={4} />
+        <input required placeholder="Subcategorie" value={form.subcategory} onChange={update("subcategory")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" />
+        <textarea required placeholder="Descriere" value={form.description} onChange={update("description")} className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-crimson focus:outline-none" rows={4} />
         <div className="grid grid-cols-2 gap-3">
           <NumberField placeholder="Preț (lei)" step="0.01" value={form.price} onChange={(v) => setForm((f) => ({ ...f, price: v }))} />
           <NumberField placeholder="Stoc" value={form.stock} onChange={(v) => setForm((f) => ({ ...f, stock: v }))} />
@@ -235,7 +213,7 @@ function AddProductForm() {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="mb-1.5 block text-xs font-medium text-white/60">Imagine principală</label>
-            <label className="relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white/10 transition-colors hover:border-voltaic/60">
+            <label className="relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white/10 transition-colors hover:border-crimson/60">
               {mainImagePreview ? (
                 <img src={mainImagePreview} alt="Previzualizare imagine principală" className="h-full w-full object-cover" />
               ) : (
@@ -252,7 +230,7 @@ function AddProductForm() {
 
           <div>
             <label className="mb-1.5 block text-xs font-medium text-white/60">Alte imagini</label>
-            <label className="relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white/10 transition-colors hover:border-voltaic/60">
+            <label className="relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white/10 transition-colors hover:border-crimson/60">
               {otherImagePreviews.length > 0 ? (
                 <div className="grid h-full w-full grid-cols-2 gap-0.5 p-0.5">
                   {otherImagePreviews.slice(0, 4).map((src, i) => (
@@ -282,7 +260,7 @@ function AddProductForm() {
 
         {error && <p className="text-sm text-red-300">{error}</p>}
         {success && <p className="text-sm text-emerald-300">Produs adăugat cu succes.</p>}
-        <button type="submit" disabled={loading} className="mt-2 rounded-full bg-voltaic px-6 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-voltaic/90 disabled:opacity-50">
+        <button type="submit" disabled={loading} className="mt-2 rounded-full bg-crimson px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crimson-deep disabled:opacity-50">
           {loading ? "Se încarcă..." : "Adaugă produs"}
         </button>
       </form>

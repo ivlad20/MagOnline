@@ -1,11 +1,18 @@
 import { getToken } from "@/lib/auth";
 import { NewProductPayload } from "@/types/product";
 import { apiFetch } from "./api";
-import { ProductCardInterface, ProductPlusImages, Product } from "@/types/product";
+import { USE_MOCK } from "./mock";
+import {
+  ProductCardInterface,
+  ProductPlusImages,
+  Product,
+} from "@/types/product";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export async function uploadProduct(payload: NewProductPayload): Promise<number> {
+export async function uploadProduct(
+  payload: NewProductPayload,
+): Promise<number> {
   const token = getToken();
   const formData = new FormData();
   formData.append("brand", payload.brand);
@@ -34,7 +41,7 @@ export async function uploadProduct(payload: NewProductPayload): Promise<number>
 
 export function getRandomProducts(count: number) {
   return apiFetch<ProductCardInterface[]>(`/products/random/${count}`).then(
-    (data) => data ?? []
+    (data) => data ?? [],
   );
 }
 
@@ -43,12 +50,13 @@ export function getProductById(id: number | string) {
 }
 
 export function getProductsByCategory(category: string) {
-  return apiFetch<Product[]>(`/products/category/${encodeURIComponent(category)}`).then(
-    (data) => data ?? []
-  );
+  return apiFetch<Product[]>(
+    `/products/category/${encodeURIComponent(category)}`,
+  ).then((data) => data ?? []);
 }
 
 export async function recordProductView(productId: number): Promise<void> {
+  if (USE_MOCK) return;
   const token = getToken();
   if (!token) return;
 
@@ -59,6 +67,7 @@ export async function recordProductView(productId: number): Promise<void> {
 }
 
 export async function getRecentlyViewed(): Promise<ProductPlusImages[]> {
+  if (USE_MOCK) return [];
   const token = getToken();
   if (!token) return [];
 
