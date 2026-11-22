@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS products (
     description TEXT,
     price DECIMAL(10, 2) NOT NULL,
     stock INT DEFAULT 0,
+    title VARCHAR(255) NOT NULL,
+    FULLTEXT KEY ft_products_search (title, brand, description),
     FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -84,13 +86,24 @@ CREATE TABLE IF NOT EXISTS favorites (
 );
 
 
-CREATE TABLE images (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        product_id INT NOT NULL,
-                        image_url VARCHAR(255) NOT NULL,
-                        is_main BOOLEAN NOT NULL DEFAULT FALSE,
-                        CONSTRAINT fk_product
-                            FOREIGN KEY (product_id) REFERENCES products(id)
-                                ON DELETE CASCADE
+-- SELLERS TABLE (un user poate deveni vânzător)
+CREATE TABLE IF NOT EXISTS sellers (
+    user_id INT PRIMARY KEY,
+    company_name VARCHAR(150) NOT NULL,
+    cui VARCHAR(20) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    iban VARCHAR(34) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- RECENTLY VIEWED TABLE (un rând per user + produs, actualizat la fiecare vizualizare)
+CREATE TABLE IF NOT EXISTS recently_viewed (
+    user_id INT NOT NULL,
+    product_id INT NOT NULL,
+    viewed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, product_id),
+    INDEX idx_recently_viewed_user (user_id, viewed_at),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);

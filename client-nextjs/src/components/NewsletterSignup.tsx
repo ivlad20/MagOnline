@@ -22,45 +22,36 @@ export default function NewsletterSignup() {
   };
 
   return (
-    <section className="relative bg-white">
-      <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 px-4 py-20 text-center sm:px-6 lg:px-8">
-        <span className="text-base font-bold uppercase tracking-wider text-voltaic sm:text-lg">
-          Newsletter
-        </span>
-        <h2 className="font-display text-2xl font-semibold text-gray-900 sm:text-3xl">
-          Fii primul care află de reduceri
-        </h2>
-        <p className="max-w-md text-sm text-gray-500">
-          Prețuri bune, lansări noi și oferte exclusive, direct în inbox. Fără spam, promis.
-        </p>
+    <section className="bg-seal">
+      <div className="mx-auto flex max-w-[1400px] flex-col gap-5 px-4 py-8 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
+        <div className="text-white">
+          <h2 className="font-display text-xl font-semibold sm:text-2xl">Fii primul care află de reduceri</h2>
+          <p className="mt-1 text-sm text-white/75">
+            Oferte exclusive și lansări noi, direct în inbox. Fără spam, promis.
+          </p>
+        </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex w-full max-w-md flex-col gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-2 shadow-sm sm:flex-row"
-        >
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="adresa@email.com"
-            className="w-full rounded-full bg-transparent px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 outline-none"
-          />
-          <button
-            type="submit"
-            disabled={status === "loading"}
-            className="shrink-0 rounded-full bg-voltaic px-6 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-voltaic/90 disabled:opacity-60"
-          >
-            {status === "loading" ? "Se trimite..." : "Mă abonez"}
-          </button>
-        </form>
-
-        {status === "success" && (
-          <p className="text-sm text-emerald-600">Te-ai abonat cu succes. Mulțumim!</p>
-        )}
-        {status === "error" && (
-          <p className="text-sm text-red-600">A apărut o eroare. Încearcă din nou.</p>
-        )}
+        <div className="w-full lg:max-w-md">
+          <form onSubmit={handleSubmit} className="flex overflow-hidden rounded-lg bg-white shadow-sm">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="adresa@email.com"
+              className="w-full bg-transparent px-4 py-3 text-sm text-ink placeholder:text-ink-soft/60 outline-none"
+            />
+            <button
+              type="submit"
+              disabled={status === "loading"}
+              className="shrink-0 bg-crimson px-6 text-sm font-semibold text-white transition-colors hover:bg-crimson-deep disabled:opacity-60"
+            >
+              {status === "loading" ? "Se trimite..." : "Mă abonez"}
+            </button>
+          </form>
+          {status === "success" && <p className="mt-2 text-sm text-white">Te-ai abonat cu succes. Mulțumim!</p>}
+          {status === "error" && <p className="mt-2 text-sm text-crimson-soft">A apărut o eroare. Încearcă din nou.</p>}
+        </div>
       </div>
     </section>
   );

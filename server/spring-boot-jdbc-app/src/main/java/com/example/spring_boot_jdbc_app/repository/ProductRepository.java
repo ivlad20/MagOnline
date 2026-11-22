@@ -272,19 +272,19 @@ public class ProductRepository {
     }
 
     public List<ProductPlusImages> getProductsByCategoryPlusImages(String category) {
-        String sql = "SELECT * FROM products WHERE category = ?";
+        String sql = "SELECT * FROM products WHERE LOWER(TRIM(category)) = LOWER(TRIM(?))";
         List<Product> products = jdbcTemplate.query(sql, productPartialRowMapper, category);
         return attachImages(products);
     }
 
     public List<ProductPlusImages> getProductsByCategoryAndSubcategoryPlusImages(String category, String subcategory) {
-        String sql = "SELECT * FROM products WHERE category = ? AND subcategory = ?";
+        String sql = "SELECT * FROM products WHERE LOWER(TRIM(category)) = LOWER(TRIM(?)) AND LOWER(TRIM(subcategory)) = LOWER(TRIM(?))";
         List<Product> products = jdbcTemplate.query(sql, productPartialRowMapper, category, subcategory);
         return attachImages(products);
     }
 
     public List<String> getDistinctSubcategoriesByCategory(String category) {
-        String sql = "SELECT DISTINCT subcategory FROM products WHERE category = ? AND subcategory IS NOT NULL ORDER BY subcategory";
+        String sql = "SELECT DISTINCT subcategory FROM products WHERE LOWER(TRIM(category)) = LOWER(TRIM(?)) AND subcategory IS NOT NULL ORDER BY subcategory";
         return jdbcTemplate.queryForList(sql, String.class, category);
     }
 

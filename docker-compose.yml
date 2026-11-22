@@ -1,0 +1,54 @@
+# Backend MagOnline rulat local: MySQL + Spring Boot.
+#   docker compose up -d --build     pornește tot (prima dată durează câteva minute)
+#   docker compose logs -f backend   loguri backend
+#   docker compose down              oprește (datele rămân în volum)
+#   docker compose down -v           oprește și șterge datele (seed-ul se reîncarcă la următorul up)
+#
+# Parolele de aici sunt doar pentru dezvoltare locală; le poți suprascrie într-un fișier .env lângă acest fișier.
+
+services:
+  db:
+    image: mysql:8.4
+    container_name: magonline-db
+    restart: unless-stopped
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    environment:
+      MYSQL_DATABASE: ecommerce
+      MYSQL_USER: magonline_app
+      MYSQL_PASSWORD: ${DB_PASSWORD:-magonline_local}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-magonline_root_local}
+    ports:
+      - "3307:3306" # 3307 pe host, ca să nu se bată cu un MySQL instalat local
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./server/spring-boot-jdbc-app/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./server/spring-boot-jdbc-app/db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  backend:
+    build: ./server/spring-boot-jdbc-app
+    container_name: magonline-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/ecommerce?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: magonline_app
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-magonline_local}
+      APP_STORAGE: local
+      APP_STORAGE_LOCAL_DIR: /app/uploads
+      APP_PUBLIC_URL: http://localhost:8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads:/app/uploads
+
+volumes:
+  db-data:
+  uploads:

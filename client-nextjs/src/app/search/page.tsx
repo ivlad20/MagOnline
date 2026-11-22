@@ -1,6 +1,5 @@
 import ListingLayout from "@/components/ListingLayout";
-import { type Product } from "@/components/ProductCard";
-import { fetchSearchResults } from "@/lib/api";
+import { fetchSearchResults } from "@/lib/search";
 
 export default async function SearchPage({
   searchParams,
@@ -12,7 +11,7 @@ export default async function SearchPage({
 
   return (
     <ListingLayout
-      heading={q ? `Rezultate pentru "${q}"` : "Căutare produse"}
+      heading={q ? `Rezultate pentru „${q}”` : "Căutare produse"}
       resultCount={products.length}
       products={products}
     />

@@ -51,7 +51,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   return (
     <div className="w-full max-w-sm rounded-3xl border border-white/15 bg-white/10 p-8 text-white shadow-2xl backdrop-blur-xl">
-      <p className="mb-1 font-mono text-xs uppercase tracking-widest text-voltaic">
+      <p className="mb-1 font-mono text-xs uppercase tracking-widest text-crimson">
         {mode === "login" ? "> autentificare" : "> cont nou"}
       </p>
       <h2 className="mb-6 font-display text-2xl font-semibold">
@@ -67,14 +67,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                 placeholder="Prenume"
                 value={form.name}
                 onChange={update("name")}
-                className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-voltaic"
+                className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-crimson"
               />
               <input
                 required
                 placeholder="Nume"
                 value={form.surname}
                 onChange={update("surname")}
-                className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-voltaic"
+                className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-crimson"
               />
             </div>
             <input
@@ -82,7 +82,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               placeholder="Nume utilizator"
               value={form.username}
               onChange={update("username")}
-              className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-voltaic"
+              className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-crimson"
             />
             <input
               required
@@ -90,7 +90,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               placeholder="Telefon"
               value={form.phone}
               onChange={update("phone")}
-              className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-voltaic"
+              className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-crimson"
             />
           </>
         )}
@@ -101,7 +101,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           placeholder="Email"
           value={form.email}
           onChange={update("email")}
-          className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-voltaic"
+          className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-crimson"
         />
         <input
           required
@@ -109,7 +109,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           placeholder="Parolă"
           value={form.password}
           onChange={update("password")}
-          className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-voltaic"
+          className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-crimson"
         />
 
         {error && <p className="text-sm text-red-400">{error}</p>}
@@ -117,7 +117,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 rounded-full bg-voltaic px-6 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-voltaic/90 disabled:opacity-50"
+          className="mt-2 rounded-full bg-crimson px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crimson-deep disabled:opacity-50"
         >
           {loading ? "Se procesează..." : mode === "login" ? "Autentificare" : "Creează cont"}
         </button>
